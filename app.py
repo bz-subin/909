@@ -8,7 +8,15 @@ CORS(app)
 
 @app.route('/')
 def home():
-    return render_template('index.html') 
+    return render_template('login.html') 
+
+@app.route('/map')
+def map_page():
+    return render_template('map.html') 
+
+@app.route('/community/<place_name>')
+def community_page(place_name):
+    return render_template('community.html', place_name=place_name) 
 
 # 새로 추가하는 API 엔드포인트
 @app.route('/api/hello')

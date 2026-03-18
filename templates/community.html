@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daejeon Community - {{ place_name }}</title>
+    <link rel="stylesheet" href="/static/css/styles.css">
+</head>
+<body class="bg-gray-50">
+    <header class="community-header">
+        <div class="header-inner">
+            <div class="header-left">
+                <button class="back-btn" onclick="window.location.href='/map'">
+                    <img src="/static/images/펭귄 이미지.jpg" alt="Logo" onerror="this.src='https://via.placeholder.com/64'">
+                </button>
+                <h1 style="font-size: 1.25rem;">{{ place_name }}</h1>
+            </div>
+            <div>
+                <button class="btn-primary" style="padding: 0.5rem 1rem;">게시글 작성</button>
+            </div>
+        </div>
+    </header>
+
+    <div class="community-layout">
+        <main class="main-content">
+            <div class="top-bar">
+                <div class="search-wrapper">
+                    <!-- Basic text icon instead of lucide react -->
+                    <span class="search-icon">🔍</span>
+                    <input type="text" placeholder="대전의 편의 위치 추천해 슈퍼미 모두같은 명소를 찾고싶어요">
+                </div>
+                <div class="tabs">
+                    <button class="tab active">전체</button>
+                    <button class="tab">추천순</button>
+                    <button class="tab">최신</button>
+                    <button class="tab">리뷰</button>
+                    <button class="tab">사진</button>
+                </div>
+            </div>
+
+            <div class="post-list" id="postList">
+                <!-- Posts will be injected here via JS -->
+            </div>
+        </main>
+
+        <aside class="right-sidebar">
+            <div class="widget">
+                <div class="widget-title">
+                    <span style="color: #f97316;">📈</span> 내 주변 인기 장소
+                </div>
+                <div class="popular-place">
+                    <div class="rank">01</div>
+                    <div>
+                        <h4 style="font-size: 0.875rem;">판암수족관</h4>
+                        <p style="font-size: 0.75rem; color: var(--text-muted);">오늘 1,267 건</p>
+                    </div>
+                </div>
+                <div class="popular-place">
+                    <div class="rank">02</div>
+                    <div>
+                        <h4 style="font-size: 0.875rem;">스마더프로 쇼핑</h4>
+                        <p style="font-size: 0.75rem; color: var(--text-muted);">오늘 982건씩</p>
+                    </div>
+                </div>
+                <div class="popular-place">
+                    <div class="rank">03</div>
+                    <div>
+                        <h4 style="font-size: 0.875rem;">류성준탑</h4>
+                        <p style="font-size: 0.75rem; color: var(--text-muted);">오늘 620건험장</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="widget fancy-widget" style="position: relative; overflow: hidden">
+                <div style="display: flex; gap: 1rem; align-items: flex-start;">
+                    <div class="avatar" style="border-color: transparent">
+                        <img src="/static/images/펭귄 이미지.jpg" alt="Helper" onerror="this.src='https://via.placeholder.com/64'">
+                    </div>
+                    <div>
+                        <h4 style="margin-bottom: 0.25rem;">대연에게 물어!</h4>
+                        <p style="font-size: 0.875rem; line-height: 1.4">모든 대전여행 정보를 펭귄이 도와줄 것이 아닌가도 모르겠어요!</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="widget dark-widget">
+                <h3 style="margin-bottom: 1rem; font-size: 1.125rem;">오늘의 이벤트</h3>
+                <input type="text" class="dark-input" placeholder="지금 다른로투돔">
+            </div>
+        </aside>
+    </div>
+
+    <script>
+        const placeName = "{{ place_name }}";
+        
+        // Mock DB connection instead of Real Supabase
+        const mockPosts = [
+            { id: "1", title: "펜슨 크스: 연실무 덮밥스 키친", content: "오모역 근처가 참말 맛실타입니다. 대전에서 벗 출발하더래요.", author: "대전자", category: placeName, likes: 234, comments: 365, time: "5분전", thumb: "https://via.placeholder.com/150x100?text=Food" },
+            { id: "2", title: "소재동 카페거리에서의 여유로운 휴식", content: "대전에서 유명한 카페거리에서 친구들과 즐거운 시간을 보냈어요.", author: "소재동", category: placeName, likes: 187, comments: 600, time: "600m 가면" },
+            { id: "3", title: "최고의 뷰맛집", content: "이 근처에서 가장 뷰가 좋은 곳입니다. 강추합니다!", author: "여행자", category: placeName, likes: 156, comments: 490, time: "490m 가면" }
+        ];
+
+        const postListEl = document.getElementById('postList');
+        
+        mockPosts.forEach(post => {
+            const card = document.createElement('div');
+            card.className = 'post-card';
+            card.innerHTML = `
+                ${post.thumb ? `<img src="${post.thumb}" class="post-thumb" alt="thumb">` : ''}
+                <div class="post-content" style="flex: 1">
+                    <h3>${post.title}</h3>
+                    <p>${post.content}</p>
+                    <div class="post-meta">
+                        <span>${post.author}</span> •
+                        <span>${post.time}</span>
+                        <span style="margin-left: auto;">👍 ${post.likes}</span>
+                        <span>💬 ${post.comments}</span>
+                        <span class="badge">${post.category}</span>
+                    </div>
+                </div>
+            `;
+            postListEl.appendChild(card);
+        });
+    </script>
+</body>
+</html>

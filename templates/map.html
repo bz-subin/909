@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daejeon Map</title>
+    <link rel="stylesheet" href="/static/css/styles.css">
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+</head>
+<body>
+    <div class="map-layout">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="profile-section">
+                <div class="avatar">
+                    <img src="/static/images/펭귄 이미지.jpg" alt="Profile" onerror="this.src='https://via.placeholder.com/64'">
+                </div>
+                <div>
+                    <h3 style="font-size: 1rem;">대전 고 (Daejeon Go)</h3>
+                    <p style="font-size: 0.75rem; color: var(--text-muted)">대전 여행자</p>
+                </div>
+            </div>
+
+            <div class="route-section">
+                <div class="instruction-box">
+                    <span>🧭</span> 300m 앞 우회전
+                </div>
+                <div class="input-container">
+                    <div class="dot-start"></div>
+                    <input type="text" id="origin" class="route-input" placeholder="출발지" value="대전역">
+                </div>
+                <div class="input-container">
+                    <div class="dot-end"></div>
+                    <input type="text" id="destination" class="route-input" placeholder="도착지" value="성심당">
+                </div>
+                <button class="btn-primary" style="margin-top: 0.5rem;" onclick="searchRoute()">경로 검색 하기 →</button>
+            </div>
+
+            <div class="categories-section">
+                <div class="section-title">
+                    <span>🧭</span> 장소 분류
+                </div>
+                <button class="category-btn active" onclick="setCategory('전체', this)">📍 전체</button>
+                <button class="category-btn" onclick="setCategory('여행지', this)">🏠 여행지</button>
+                <button class="category-btn" onclick="setCategory('맛집', this)">🍽️ 맛집</button>
+                <button class="category-btn" onclick="setCategory('도서관', this)">📚 도서관</button>
+                <button class="category-btn" onclick="setCategory('카페', this)">☕ 카페</button>
+                <button class="category-btn" onclick="setCategory('자연/공원', this)">🌲 자연/공원</button>
+            </div>
+
+            <div class="stats-section">
+                <div class="avatar" style="width: 2.5rem; height: 2.5rem">
+                    <img src="/static/images/펭귄 이미지.jpg" alt="Mascot" onerror="this.src='https://via.placeholder.com/64'">
+                </div>
+                <div>
+                    <p style="font-size: 0.875rem; font-weight: 500;">월별 22°C 평일!</p>
+                    <p style="font-size: 0.75rem; color: var(--text-muted)">오늘 평일 날씨가 멋져요!<br>대전으로 탐험하러 갈까요? 👍</p>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Map Area -->
+        <main class="map-area">
+            <div id="map"></div>
+
+            <!-- Custom Place Popup Overlay -->
+            <div class="place-popup" id="placePopup">
+                <button class="popup-close" onclick="closePopup()">✕</button>
+                <img src="" alt="Place" class="popup-img" id="popupImg">
+                <h3 style="font-size: 1.25rem; margin-bottom: 0.5rem;" id="popupTitle">Place Name</h3>
+                <p style="font-size: 0.875rem; color: var(--text-muted); margin-bottom: 1rem" id="popupDesc">Description of the place goes here.</p>
+                <div style="color: #eab308; margin-bottom: 1rem; font-size: 0.875rem">
+                    🔥 4.8
+                </div>
+                <button class="btn-primary" style="display: flex; gap: 0.5rem; justify-content: center" id="popupLink">
+                    커뮤니티로 이동 🔥
+                </button>
+            </div>
+
+            <!-- Helper Penguin Floating -->
+            <div class="helper-penguin">
+                <div class="helper-avatar">
+                    <img src="/static/images/펭귄 이미지.jpg" alt="Helper" onerror="this.src='https://via.placeholder.com/64'">
+                </div>
+                <div style="position: absolute; top: -3.5rem; right: 0; background: white; padding: 0.5rem 1rem; border-radius: 0.75rem; box-shadow: var(--shadow-md); white-space: nowrap">
+                    <p style="font-size: 0.875rem; font-weight: 500">월별 22°C 평일!</p>
+                    <p style="font-size: 0.75rem; color: var(--text-muted)">오늘 평일 날씨가 좋아요! 👍</p>
+                </div>
+                <div class="pulse-badge">🔥</div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        // Init Leaflet Map centered on Daejeon
+        const map = L.map('map').setView([36.3504, 127.3845], 13);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
+
+        // Mock Places representing within 5km of route
+        const mockPlaces = [
+            { id: "1", name: "Starfield Library", lat: 37.5097, lng: 127.0561, category: "도서관", desc: "A futuristic public library located in the center of COEX Mall..." },
+            { id: "2", name: "대전 고", lat: 36.3504, lng: 127.3845, category: "교육", desc: "대전의 중심 학교" },
+            { id: "3", name: "성심당", lat: 36.3276, lng: 127.4273, category: "맛집", desc: "대전 대표 베이커리 맛집" },
+            { id: "4", name: "소제동 카페거리", lat: 36.3321, lng: 127.4391, category: "카페", desc: "핫플 카페거리" },
+            { id: "5", name: "중앙시장", lat: 36.3298, lng: 127.4302, category: "맛집", desc: "맛있는 길거리 음식" }
+        ];
+
+        let markers = [];
+
+        function renderPins(categoryFilter = '전체') {
+            // clear existing
+            markers.forEach(m => map.removeLayer(m));
+            markers = [];
+
+            mockPlaces.forEach(place => {
+                if (categoryFilter !== '전체' && place.category !== categoryFilter) return;
+
+                const marker = L.marker([place.lat, place.lng]).addTo(map);
+                marker.on('click', () => {
+                    openPopup(place);
+                });
+                markers.push(marker);
+            });
+        }
+
+        // initial render
+        renderPins();
+
+        function searchRoute() {
+            // Mock map center animation
+            map.flyTo([36.3276, 127.4273], 14, { animate: true, duration: 1.5 });
+        }
+
+        function setCategory(cat, btnElem) {
+            document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
+            btnElem.classList.add('active');
+            renderPins(cat);
+        }
+
+        function openPopup(place) {
+            const popup = document.getElementById('placePopup');
+            document.getElementById('popupTitle').innerText = place.name;
+            document.getElementById('popupDesc').innerText = place.desc;
+            document.getElementById('popupImg').src = `https://via.placeholder.com/400x200?text=${encodeURIComponent(place.name)}`;
+            
+            document.getElementById('popupLink').onclick = function() {
+                window.location.href = '/community/' + encodeURIComponent(place.name);
+            };
+            
+            popup.classList.add('show');
+        }
+
+        function closePopup() {
+            document.getElementById('placePopup').classList.remove('show');
+        }
+    </script>
+</body>
+</html>

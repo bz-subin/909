@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daejeon Arctic Project - Login</title>
+    <link rel="stylesheet" href="/static/css/styles.css">
+</head>
+<body class="login-body">
+    <!-- Background patterns -->
+    <div class="login-bg-pattern">
+        <div class="login-bg-blob1"></div>
+        <div class="login-bg-blob2"></div>
+    </div>
+
+    <!-- Penguin Mascot -->
+    <div class="penguin-container">
+        <img src="/static/images/펭귄 이미지.jpg" alt="Penguin" class="penguin-img" onerror="this.src='https://via.placeholder.com/256?text=Penguin'">
+        <div class="penguin-speech">
+            <p>반갑다 여행러 ㅋ</p>
+            <p>오늘은 어디로 갈거야?</p>
+        </div>
+    </div>
+
+    <!-- Login Form -->
+    <div class="login-card">
+        <h1>Daejeon</h1>
+        <p class="subtitle">Arctic Project</p>
+
+        <form class="login-form" id="loginForm">
+            <div class="input-group">
+                <input type="text" id="username" placeholder="아이디를 입력" required>
+            </div>
+            <div class="input-group">
+                <input type="password" id="password" placeholder="비밀번호" required>
+            </div>
+            <button type="submit" class="btn-primary">로그인 →</button>
+        </form>
+
+        <div class="social-login">
+            <p>CONTINUE WITH</p>
+            <div class="social-buttons">
+                <button class="social-btn btn-n">N</button>
+                <button class="social-btn btn-k">K</button>
+                <button class="social-btn btn-g">G</button>
+            </div>
+            <a href="#" class="signup-link">회원가입 (Sign Up)</a>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            // Basic login redirect logic
+            window.location.href = '/map';
+        });
+    </script>
+</body>
+</html>
