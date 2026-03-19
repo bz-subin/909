@@ -9,7 +9,7 @@
 
 <body class="bg-gray-50">
 
-    <!--헤더더-->
+    <!--헤더-->
     <header class="community-header">
         <div class="header-inner">
             <div class="header-left">
@@ -22,7 +22,7 @@
             </div>
             <div>
                 <form>
-                    <button class="btn-primary" style="padding: 0.5rem 1rem;">게시글 작성</button>
+                    <button class="btn-primary">게시글 작성</button>
                 </form>
             </div>
         </div>
@@ -57,6 +57,7 @@
 
             <div id="write-modal">
             <!--js 들어갈 예정-->
+                <button onclick="closeModal()"> X </button>
             </div>
 
             <div class="widget">
@@ -146,7 +147,7 @@
                 <textarea name="textuser" id="text-user" placeholder="입력해주세요"></textarea>
             <form>
             `
-         })
+        })
 
 
 
@@ -155,7 +156,7 @@
          const title_user = document.querySelector(".title-user") // 제목
          const text_user = document.querySelector(".text-user") // 내용
 
-         btn_save.addEventListener("click", async(event) =>{
+        btn_save.addEventListener("click", async(event) =>{
             event.preventDefault();
             const value_title = title_user.value
             const value_text = text_user.value
@@ -177,13 +178,6 @@
 
                 // 에러 처리 없음 
                 // 빈 값 검증 없음
-
-
-
-
-         
-
-
 
     </script>
 </body>
