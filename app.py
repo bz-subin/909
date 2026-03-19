@@ -122,13 +122,20 @@ async def community_page(request: Request, place_name: str):
 
 # input 받아서 잘 받았다는 메시지 반환 
 @app.post("/user_input")
-async def user_input(data: UserInput):
+async def user_input(data: UserInput, db: Session = Depends(get_db)):
     print(f"제목: {data.title}, 내용: {data.content}")  # 서버 로그 확인용
-    return {"message": "input 값 잘 받았습니다~", "title": data.title, "content": data.content}
-
-    title = Column(Text, nullable=False)
-    content = Column(Text, nullable=False)
-
+   
+    new_feed = Feed(          # Feed 모델에 값 담기
+        title=data.title,
+        content=data.content,
+        user_id="임시 uuid"   # 나중에 인증으로 교체
+    )
+    
+    db.add(new_feed)     # DB에 올리기
+    db.commit()          # 저장 확정
+    db.refresh(new_feed) # 자동값 반영
+    
+    return {"message": "저장 완료!", "id": new_feed.id}
 
 
 
