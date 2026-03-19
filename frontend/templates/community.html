@@ -6,14 +6,19 @@
     <title>Daejeon Community - {{ place_name }}</title>
     <link rel="stylesheet" href="/static/css/styles.css">
 </head>
+
 <body class="bg-gray-50">
+
+    <!--헤더더-->
     <header class="community-header">
         <div class="header-inner">
             <div class="header-left">
+                
                 <button class="back-btn" onclick="window.location.href='/map'">
                     <img src="/static/images/펭귄 이미지.jpg" alt="Logo" onerror="this.src='https://via.placeholder.com/64'">
                 </button>
-                <h1 style="font-size: 1.25rem;">{{ place_name }}</h1>
+
+                <h1 style="font-size: 1.25rem;">{{ place_name }}</h1> 
             </div>
             <div>
                 <button class="btn-primary" style="padding: 0.5rem 1rem;">게시글 작성</button>
@@ -21,15 +26,17 @@
         </div>
     </header>
 
+
     <div class="community-layout">
         <main class="main-content">
+
             <div class="top-bar">
-                <div class="search-wrapper">
-                    <!-- Basic text icon instead of lucide react -->
-                    <span class="search-icon">🔍</span>
+                <div class="search-wrapper">   <!--검색창-->
+                    <span class="search-icon">🔍</span> 
                     <input type="text" placeholder="대전의 편의 위치 추천해 슈퍼미 모두같은 명소를 찾고싶어요">
                 </div>
-                <div class="tabs">
+
+                <div class="tabs">   <!--검색창 밑 버튼(전체, 추천순, 최신, 리뷰, 사진)-->
                     <button class="tab active">전체</button>
                     <button class="tab">추천순</button>
                     <button class="tab">최신</button>
@@ -39,29 +46,33 @@
             </div>
 
             <div class="post-list" id="postList">
-                <!-- Posts will be injected here via JS -->
+                <!-- js로 뭔가 넣는듯 -->
             </div>
         </main>
 
-        <aside class="right-sidebar">
+
+        <aside class="right-sidebar"> <!-- 인기 장소-->
             <div class="widget">
                 <div class="widget-title">
                     <span style="color: #f97316;">📈</span> 내 주변 인기 장소
                 </div>
-                <div class="popular-place">
+
+                <div class="popular-place"> <!--피드-->
                     <div class="rank">01</div>
                     <div>
                         <h4 style="font-size: 0.875rem;">판암수족관</h4>
-                        <p style="font-size: 0.75rem; color: var(--text-muted);">오늘 1,267 건</p>
+                        <p style="font-size: 0.75rem; color: var(--text-muted);">오늘 1,267 건</p>  <!--TODO. 조회수 구하는 로직 필요-->
                     </div>
                 </div>
+
                 <div class="popular-place">
                     <div class="rank">02</div>
                     <div>
                         <h4 style="font-size: 0.875rem;">스마더프로 쇼핑</h4>
-                        <p style="font-size: 0.75rem; color: var(--text-muted);">오늘 982건씩</p>
+                        <p style="font-size: 0.75rem; color: var(--text-muted);">오늘 982건씩</p> 
                     </div>
                 </div>
+
                 <div class="popular-place">
                     <div class="rank">03</div>
                     <div>
@@ -71,26 +82,16 @@
                 </div>
             </div>
 
-            <div class="widget fancy-widget" style="position: relative; overflow: hidden">
+            <div class="widget fancy-widget" style="position: relative; overflow: hidden">  <!--css-->
                 <div style="display: flex; gap: 1rem; align-items: flex-start;">
-                    <div class="avatar" style="border-color: transparent">
-                        <img src="/static/images/펭귄 이미지.jpg" alt="Helper" onerror="this.src='https://via.placeholder.com/64'">
-                    </div>
-                    <div>
-                        <h4 style="margin-bottom: 0.25rem;">대연에게 물어!</h4>
-                        <p style="font-size: 0.875rem; line-height: 1.4">모든 대전여행 정보를 펭귄이 도와줄 것이 아닌가도 모르겠어요!</p>
-                    </div>
-                </div>
-            </div>
 
-            <div class="widget dark-widget">
-                <h3 style="margin-bottom: 1rem; font-size: 1.125rem;">오늘의 이벤트</h3>
-                <input type="text" class="dark-input" placeholder="지금 다른로투돔">
-            </div>
         </aside>
     </div>
 
-    <script>
+
+
+
+    <script> // js
         const placeName = "{{ place_name }}";
         
         // Mock DB connection instead of Real Supabase
