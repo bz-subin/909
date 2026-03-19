@@ -6,19 +6,59 @@
     <title>Daejeon Arctic Project - Login</title>
     <link rel="stylesheet" href="/static/css/styles.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="login-body">
-    <!-- Background patterns -->
-    <div class="login-bg-pattern">
+
+    <!-- Background Layer -->
+    <div class="login-background">
         <div class="login-bg-blob1"></div>
         <div class="login-bg-blob2"></div>
     </div>
 
     <!-- Penguin Mascot -->
     <div class="penguin-container">
-        <div class="penguin-speech">
-            <p>반갑다 여행러 ㅋ</p>
-            <p>오늘은 어디로 갈거야?</p>
+        <!-- Main Container -->
+        <div class="z-20 w-full max-w-5xl px-6 flex flex-col lg:flex-row items-center justify-center gap-12 lg:gap-24">
+            <!-- Updated Adélie Character Side -->
+            <div class="flex flex-col items-center text-center max-w-sm animate-float">
+            <div class="relative group">
+                <!-- Improved Adélie Penguin SVG with Realistic Features -->
+                <svg class="penguin-shadow transition-transform duration-500 group-hover:scale-105" height="280" viewbox="0 0 240 280" width="240" xmlns="http://www.w3.org/2000/svg">
+                <!-- Body - Black Tuxedo Back -->
+                <path d="M120 20C75 20 45 60 45 120C45 190 65 260 120 260C175 260 195 190 195 120C195 60 165 20 120 20Z" fill="#111D21"></path>
+                <!-- White Belly Area -->
+                <path d="M120 60C90 60 75 95 75 140C75 200 90 250 120 250C150 250 165 200 165 140C165 95 150 60 120 60Z" fill="white"></path>
+                <!-- Flippers -->
+                <path d="M45 130C25 140 15 170 20 190C25 210 50 170 60 150" fill="#111D21"></path>
+                <path d="M195 130C215 140 225 170 220 190C215 210 190 170 180 150" fill="#111D21"></path>
+                <!-- Head Details -->
+                <!-- Characteristic White Eye Rings -->
+                <circle cx="100" cy="85" fill="white" r="10"></circle>
+                <circle cx="140" cy="85" fill="white" r="10"></circle>
+                <!-- Pupils -->
+                <circle cx="102" cy="85" fill="#111D21" r="5"></circle>
+                <circle cx="138" cy="85" fill="#111D21" r="5"></circle>
+                <!-- Beak - Realistic short Adélie style -->
+                <path d="M112 105L120 120L128 105C128 105 120 102 112 105Z" fill="#2C2C2C"></path>
+                <path d="M115 108L120 115L125 108" fill="#FF8C42" opacity="0.8"></path>
+                <!-- Feet -->
+                <path d="M100 255C85 255 80 265 85 270L105 270L105 255Z" fill="#2C2C2C"></path>
+                <path d="M140 255C155 255 160 265 155 270L135 270L135 255Z" fill="#2C2C2C"></path>
+        </svg>
+        <!-- Blush for "Cute Appeal" -->
+        <div class="absolute top-[105px] left-[85px] w-4 h-2 bg-pink-300/30 rounded-full blur-[2px]"></div>
+            <div class="absolute top-[105px] right-[85px] w-4 h-2 bg-pink-300/30 rounded-full blur-[2px]"></div>
+        </div>
+        <div class="mt-8 space-y-4">
+            <div class="bg-white px-8 py-4 rounded-3xl shadow-xl border border-primary inline-block relative">
+                <p class="text-xl font-extrabold text-slate-800">안녕! 난 아델리🐧</p>
+                <div class="text-slate-600 font-medium">같이 대전 탐험가지 않을래?</div>
+                <!-- Chat bubble tail -->
+                <div class="absolute -top-3 left-1/2 -translate-x-1/2 w-6 h-6 bg-white border-l border-t border-primary rotate-45 rounded-sm"></div>
+            </div>
+        </div>
+        </div>
         </div>
     </div>
 
