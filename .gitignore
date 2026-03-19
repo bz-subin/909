@@ -2,7 +2,5 @@
 #macOS 메타데이터 파일 제외
 .DS_Store
 .env
-<<<<<<< HEAD
 
-=======
->>>>>>> c1a2c3933ce4a1bebc242ce45ee7b1cbe098b1e5
+__pycache__
