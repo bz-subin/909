@@ -7,6 +7,7 @@ from sqlalchemy import create_engine, Column, BigInteger, Text, DateTime, Float,
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, Session
 from sqlalchemy.dialects.postgresql import UUID
+import uuid
 from sqlalchemy.sql import func
 import os
 from dotenv import load_dotenv
@@ -41,7 +42,7 @@ class Profile(Base):
 class Feed(Base):
     __tablename__ = 'feeds'
     id = Column(BigInteger, primary_key=True, index=True)
-    user_id = Column(UUID(as_uuid=True), ForeignKey('profiles.id'), nullable=False)
+    user_id = Column(UUID(as_uuid=True), ForeignKey('profiles.id'), nullable=True) # 이후 false로 변경 예정
     title = Column(Text, nullable=False)
     content = Column(Text, nullable=False)
     image_url = Column(Text)
@@ -128,14 +129,14 @@ async def user_input(data: UserInput, db: Session = Depends(get_db)):
     new_feed = Feed(          # Feed 모델에 값 담기
         title=data.title,
         content=data.content,
-        user_id="임시 uuid"   # 나중에 인증으로 교체
+        # user_id=uuid.uuid4()   # 나중에 인증으로 교체
     )
     
     db.add(new_feed)     # DB에 올리기
     db.commit()          # 저장 확정
     db.refresh(new_feed) # 자동값 반영
     
-    return {"message": "저장 완료!", "id": new_feed.id}
+    return {"message": "저장 완료!", "id": str(new_feed.id)}
 
 # db 가져옴.
 @app.get("/get_data")
