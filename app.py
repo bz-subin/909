@@ -108,17 +108,13 @@ async def db_read(db: Session = Depends(get_db)):
 async def map_page(request: Request):
     return templates.TemplateResponse("map.html", {"request": request})
 
+
+# /community/플레이스명(라우터) -
 @app.get("/community/{place_name}", response_class=HTMLResponse)
 async def community_page(request: Request, place_name: str):
     return templates.TemplateResponse("community.html", {"request": request, "place_name": place_name})
 
-@app.get("/api/hello")
-async def api_hello():
-    return {"message": "Success!"}
 
-@app.get("/api/fail")
-async def api_fail():
-    raise HTTPException(status_code=404, detail="요청하신 페이지를 찾을 수 없습니다!")
 
 if __name__ == "__main__":
     import uvicorn
