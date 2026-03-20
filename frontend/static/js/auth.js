@@ -1,11 +1,11 @@
-// frontend/static/js/auth.js
+// Supabase 클라이언트 초기화
 
 const supabaseClient = window.supabase.createClient(
     window.SUPABASE_URL,
     window.SUPABASE_KEY
 );
 
-// 로그인 함수
+// 이메일 로그인 함수
 async function login(email, password) {
 const { data, error } = await supabaseClient.auth.signInWithPassword({
     email: email,
@@ -25,6 +25,7 @@ window.location.href = '/map';
 return data;
 }
 
+
 // 회원가입 함수
 async function signup(email, password, nickname) {
 // 1단계: supabaseClient Auth 회원가입
@@ -36,6 +37,7 @@ const { data: authData, error: authError } = await supabaseClient.auth.signUp({
 if (authError) {
     throw authError;
 }
+
 
 // 2단계: profiles 테이블에 추가
 const { error: profileError } = await supabaseClient
@@ -70,4 +72,28 @@ async function logout() {
 async function getCurrentUser() {
 const { data: { user } } = await supabaseClient.auth.getUser();
 return user;
+}
+
+
+// 구글 로그인
+async function loginWithGoogle() {
+    try {
+        const { data, error } = await supabaseClient.auth.signInWithOAuth({
+            provider: 'google',
+            options: {
+                redirectTo: 'http://localhost:5909/map'
+            }
+        });
+        
+        if (error) {
+            console.error('구글 로그인 에러:', error);
+            alert('구글 로그인 실패: ' + error.message);
+        }
+        
+        // OAuth는 자동으로 리다이렉트되므로 여기서 추가 처리 불필요
+        
+    } catch (error) {
+        console.error('구글 로그인 에러:', error);
+        alert('구글 로그인 중 오류 발생');
+    }
 }
