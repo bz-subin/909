@@ -88,6 +88,10 @@ class UserInput(BaseModel):  # 이 친구가 효자입니다(파싱). 키와 값
     title: str #타입 췤
     content: str
 
+class FeedUpdate(BaseModel):
+    title: str
+    content: str
+
 # --- 라우트 (API) ---
 
 @app.get("/", response_class=HTMLResponse)
@@ -125,18 +129,61 @@ async def community_page(request: Request, place_name: str):
 @app.post("/user_input")
 async def user_input(data: UserInput, db: Session = Depends(get_db)):
     print(f"제목: {data.title}, 내용: {data.content}")  # 서버 로그 확인용
-   
+    
+    # 임시 유저 ID 생성 (실제 서비스에서는 로그인 세션에서 가져와야 함)
+    temp_user_id = uuid.uuid4()
+    
     new_feed = Feed(          # Feed 모델에 값 담기
         title=data.title,
         content=data.content,
-        # user_id=uuid.uuid4()   # 나중에 인증으로 교체
+        user_id=temp_user_id 
     )
     
     db.add(new_feed)     # DB에 올리기
     db.commit()          # 저장 확정
     db.refresh(new_feed) # 자동값 반영
     
-    return {"message": "저장 완료!", "id": str(new_feed.id)}
+    return {
+        "message": "저장 완료!", 
+        "id": new_feed.id, 
+        "user_id": str(new_feed.user_id),
+        "title": new_feed.title,
+        "content": new_feed.content
+    }
+
+# 게시글 수정 (Update)
+@app.put("/feed/{feed_id}")
+async def update_feed(feed_id: int, data: FeedUpdate, db: Session = Depends(get_db)):
+    feed = db.query(Feed).filter(Feed.id == feed_id).first()
+    
+    if not feed:
+        raise HTTPException(status_code=404, detail="게시글을 찾을 수 없습니다.")
+    
+    feed.title = data.title
+    feed.content = data.content
+    
+    db.commit()
+    db.refresh(feed)
+    
+    return {
+        "message": "수정 완료!",
+        "id": feed.id,
+        "title": feed.title,
+        "content": feed.content
+    }
+
+# 게시글 삭제 (Delete)
+@app.delete("/feed/{feed_id}")
+async def delete_feed(feed_id: int, db: Session = Depends(get_db)):
+    feed = db.query(Feed).filter(Feed.id == feed_id).first()
+    
+    if not feed:
+        raise HTTPException(status_code=404, detail="게시글을 찾을 수 없습니다.")
+    
+    db.delete(feed)
+    db.commit()
+    
+    return {"message": "삭제 완료", "id": feed_id}
 
 # db 가져옴.
 @app.get("/get_data")
