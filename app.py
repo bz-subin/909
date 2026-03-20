@@ -16,7 +16,7 @@ from dependencies import require_login
 from fastapi import FastAPI, Depends, HTTPException, Request, status  # ← status 추가!
 from fastapi.responses import JSONResponse, HTMLResponse, RedirectResponse  # ← RedirectResponse 추가!
 from fastapi.templating import Jinja2Templates
-
+from typing import Optional 
 
 # .env 로드 및 설정
 load_dotenv()
@@ -25,13 +25,13 @@ DATABASE_URL = os.getenv("DB_URL")
 # 이 키는 Kakao Local API (주소 검색) 및 Kakao Navi API (길찾기) 호출 시 인증에 사용됩니다.
 KAKAO_API_KEY = os.getenv("KAKAO_API_KEY")
 
-
-# --- SQLAlchemy 설정 ---
+# --- [DB 설정] SQLAlchemy 연결 설정 ---
 engine = create_engine(DATABASE_URL, connect_args={"connect_timeout": 10})
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
 
-# DB 세션 의존성 주입 함수
+# [의존성 주입] DB 세션 생성 및 종료 관리 함수
+# API 요청 시 세션을 열고, 응답 후 자동으로 닫습니다.
 def get_db():
     db = SessionLocal()
     try:
@@ -39,7 +39,7 @@ def get_db():
     finally:
         db.close()
 
-# --- 모델 정의 (스키마) ---
+# --- [모델 정의] DB 테이블 스키마 ---
 class Profile(Base):
     __tablename__ = 'profiles'
     id = Column(UUID(as_uuid=True), primary_key=True)
@@ -48,6 +48,7 @@ class Profile(Base):
     profile_img_url = Column(Text)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
+# 게시글(Feed) 테이블 정의
 class Feed(Base):
     __tablename__ = 'feeds'
     id = Column(BigInteger, primary_key=True, index=True)
@@ -73,7 +74,7 @@ class Like(Base):
 # DB 테이블 생성
 Base.metadata.create_all(bind=engine)
 
-# --- FastAPI 앱 설정 ---
+# --- [FastAPI 앱 설정] ---
 app = FastAPI()
 
 @app.exception_handler(HTTPException)
@@ -122,6 +123,21 @@ class RouteRequest(BaseModel):
 # 이 모델은 경로 주변의 상점을 검색할 때 사용될 수 있습니다.
 class ShopsRequest(BaseModel):
     coordinates: list
+# --- [Pydantic 모델] 요청 데이터 검증 스키마 ---
+
+
+# 게시글 작성 요청 데이터 (POST)
+class UserInput(BaseModel):
+    title: str 
+    content: str
+    user_id: str # 작성자 ID (클라이언트에서 전달받음)
+    image_url: Optional[str] = None # 이미지 URL (없을 수도 있음)
+
+# 게시글 수정 요청 데이터 (PATCH)
+class FeedUpdate(BaseModel):
+    title: str
+    content: str
+    image_url: Optional[str] = None
 
 # --- 라우트 (API) ---
 
@@ -149,6 +165,7 @@ async def signup(request: Request):
         }
     )
 
+# 테스트용 DB 생성 API
 @app.post("/db_create")
 async def db_create(data: MessageRequest, db: Session = Depends(get_db)):
     return {"result": "success", "message": f"'{data.message}' 잘 받았어요!"}
@@ -225,17 +242,67 @@ async def get_shops(req: ShopsRequest):
     ]
 
 
+
+# [커뮤니티 페이지] 특정 장소의 커뮤니티 화면 렌더링
 @app.get("/community/{place_name}", response_class=HTMLResponse)
 async def community_page(request: Request, place_name: str, user = Depends(require_login)):
     return templates.TemplateResponse("community.html", {"request": request, "place_name": place_name})
 
-@app.get("/api/hello")
-async def api_hello():
-    return {"message": "Success!"}
 
-@app.get("/api/fail")
-async def api_fail():
-    raise HTTPException(status_code=404, detail="요청하신 페이지를 찾을 수 없습니다!")
+# [API] 게시글 작성 (Create)
+@app.post("/user_input")
+async def user_input(data: UserInput, db: Session = Depends(get_db)):
+    print(f"제목: {data.title}, 내용: {data.content}, 이미지: {data.image_url}")
+    
+    new_feed = Feed(          # Feed 모델에 값 담기
+        title=data.title,
+        content=data.content,
+        user_id=data.user_id,
+        image_url=data.image_url
+    )
+    
+    db.add(new_feed)     # DB에 올리기
+    db.commit()          # 저장 확정
+    db.refresh(new_feed) # 자동값 반영
+    
+    return {
+        "id": new_feed.id,
+        "user_id": str(new_feed.user_id),
+        "title": new_feed.title,
+        "content": new_feed.content,
+        "image_url": new_feed.image_url
+    }
+
+# [API] 게시글 수정 (Update)
+@app.patch("/feed/{feed_id}")
+async def update_feed(feed_id: int, data: FeedUpdate, db: Session = Depends(get_db)):
+    feed = db.query(Feed).filter(Feed.id == feed_id).first()
+    
+    if not feed:
+        raise HTTPException(status_code=404, detail="게시글을 찾을 수 없습니다.")
+    
+    feed.title = data.title
+    feed.content = data.content
+    feed.image_url = data.image_url
+    
+    db.commit()
+    db.refresh(feed)
+    
+    return {
+        "id": feed.id,
+        "user_id": str(feed.user_id),
+        "title": feed.title,
+        "content": feed.content,
+        "image_url": feed.image_url
+    }
+
+# [API] 게시글 목록 조회 (Read)
+@app.get("/get_data")
+async def get_data(db: Session = Depends(get_db)):
+    feeds = db.query(Feed).all()
+    return feeds
+
+
 
 if __name__ == "__main__":
     import uvicorn
