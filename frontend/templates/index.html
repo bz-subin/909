@@ -5,8 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Daejeon Map</title>
     <link rel="stylesheet" href="/static/css/styles.css">
-    <!-- Leaflet CSS -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 </head>
 <body>
     <div class="map-layout">
@@ -59,7 +57,7 @@
 
         <!-- Map Area -->
         <main class="map-area">
-            <div id="map"></div>
+            <div id="map" style="width: 100%; height: 100%;"></div>
 
             <!-- Custom Place Popup Overlay -->
             <div class="place-popup" id="placePopup">
@@ -89,73 +87,13 @@
         </main>
     </div>
 
-    <!-- Leaflet JS -->
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <!-- Kakao Map and related scripts -->
+    <script src="/static/js/map.js"></script>
+    <script src="/static/js/category.js"></script>
     <script>
-        // Init Leaflet Map centered on Daejeon
-        const map = L.map('map').setView([36.3504, 127.3845], 13);
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            maxZoom: 19,
-            attribution: '© OpenStreetMap contributors'
-        }).addTo(map);
-
-        // Mock Places representing within 5km of route
-        const mockPlaces = [
-            { id: "1", name: "Starfield Library", lat: 37.5097, lng: 127.0561, category: "도서관", desc: "A futuristic public library located in the center of COEX Mall..." },
-            { id: "2", name: "대전 고", lat: 36.3504, lng: 127.3845, category: "교육", desc: "대전의 중심 학교" },
-            { id: "3", name: "성심당", lat: 36.3276, lng: 127.4273, category: "맛집", desc: "대전 대표 베이커리 맛집" },
-            { id: "4", name: "소제동 카페거리", lat: 36.3321, lng: 127.4391, category: "카페", desc: "핫플 카페거리" },
-            { id: "5", name: "중앙시장", lat: 36.3298, lng: 127.4302, category: "맛집", desc: "맛있는 길거리 음식" }
-        ];
-
-        let markers = [];
-
-        function renderPins(categoryFilter = '전체') {
-            // clear existing
-            markers.forEach(m => map.removeLayer(m));
-            markers = [];
-
-            mockPlaces.forEach(place => {
-                if (categoryFilter !== '전체' && place.category !== categoryFilter) return;
-
-                const marker = L.marker([place.lat, place.lng]).addTo(map);
-                marker.on('click', () => {
-                    openPopup(place);
-                });
-                markers.push(marker);
-            });
-        }
-
-        // initial render
-        renderPins();
-
-        function searchRoute() {
-            // Mock map center animation
-            map.flyTo([36.3276, 127.4273], 14, { animate: true, duration: 1.5 });
-        }
-
-        function setCategory(cat, btnElem) {
-            document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
-            btnElem.classList.add('active');
-            renderPins(cat);
-        }
-
-        function openPopup(place) {
-            const popup = document.getElementById('placePopup');
-            document.getElementById('popupTitle').innerText = place.name;
-            document.getElementById('popupDesc').innerText = place.desc;
-            document.getElementById('popupImg').src = `https://via.placeholder.com/400x200?text=${encodeURIComponent(place.name)}`;
-            
-            document.getElementById('popupLink').onclick = function() {
-                window.location.href = '/community/' + encodeURIComponent(place.name);
-            };
-            
-            popup.classList.add('show');
-        }
-
-        function closePopup() {
-            document.getElementById('placePopup').classList.remove('show');
-        }
+        document.addEventListener("DOMContentLoaded", function() {
+            connectKakaomap();
+        });
     </script>
 </body>
 </html>

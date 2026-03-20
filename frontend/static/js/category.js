@@ -57,17 +57,32 @@ async function coordinateInsert() {
     }
 }
 
+/**
+ * [목적]
+ * 카테고리 버튼 클릭 시 UI 활성 상태를 변경하고, 해당 카테고리에 맞춰 상점 데이터를 필터링합니다.
+ * @param {string} categoryName - 선택된 카테고리 이름 (예: '맛집', '쇼핑')
+ * @param {HTMLElement} buttonElement - 클릭된 HTML 버튼 요소
+ */
+function setCategory(categoryName, buttonElement) {
+    // 모든 카테고리 버튼에서 'active' 클래스를 제거합니다.
+    const categoryButtons = document.querySelectorAll('.category-btn');
+    categoryButtons.forEach(btn => btn.classList.remove('active'));
+
+    // 클릭된 버튼에만 'active' 클래스를 추가합니다.
+    buttonElement.classList.add('active');
+
+    // 카테고리 필터링 로직을 호출합니다.
+    filterShopsByCategory(categoryName);
+}
 
 /**
  * [목적]
  * 사용자가 선택한 카테고리에 해당하는 상점들만 실시간으로 필터링하여 지도에 표시합니다.
+ * (이전 categorySelect 함수)
  * @param {string} categoryName - 사용자가 클릭한 카테고리 버튼의 값 (예: '맛집', '쇼핑')
  * @returns {number} - 필터링된 상점 리스트의 개수를 반환합니다.
  */
-function categorySelect(categoryName) {
-    // // TODO: 선택된 카테고리를 시각적으로 강조하는 UI 상태 관리 로직이 필요합니다.
-    // // 예: 모든 버튼에서 'active' 클래스를 제거하고, 선택된 버튼에만 추가합니다.
-
+function filterShopsByCategory(categoryName) {
     // 원본 상점 데이터가 없으면 함수를 종료합니다.
     if (!rawShopData || rawShopData.length === 0) {
         // 0을 반환합니다.
