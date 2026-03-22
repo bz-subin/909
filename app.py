@@ -132,12 +132,14 @@ class UserInput(BaseModel):
     content: str
     user_id: str # 작성자 ID (클라이언트에서 전달받음)
     image_url: Optional[str] = None # 이미지 URL (없을 수도 있음)
+    category_code : Optional[str] = None
 
 # 게시글 수정 요청 데이터 (PATCH)
 class FeedUpdate(BaseModel):
     title: str
     content: str
     image_url: Optional[str] = None
+    category_code : Optional[str] = None
 
 # --- 라우트 (API) ---
 
@@ -243,11 +245,25 @@ async def get_shops(req: ShopsRequest):
 
 
 
+
+# 아래에 테스트 라우터 추가
+@app.get("/test", response_class=HTMLResponse)
+async def test(request: Request):
+    return templates.TemplateResponse("test.html", {"request": request})
+
+
+
+
+#----------------------------------------------------------------------------------------------
+
 # [커뮤니티 페이지] 특정 장소의 커뮤니티 화면 렌더링
 @app.get("/community/{place_name}", response_class=HTMLResponse)
-async def community_page(request: Request, place_name: str, user = Depends(require_login)):
-    return templates.TemplateResponse("community.html", {"request": request, "place_name": place_name})
-
+async def community_page(request: Request, place_name: str, category: Optional[str] = None):
+    return templates.TemplateResponse("community.html", {
+        "request": request, 
+        "place_name": place_name,
+        "category": category  #! 추가
+    })
 
 # [API] 게시글 작성 (Create)
 @app.post("/user_input")
@@ -258,7 +274,8 @@ async def user_input(data: UserInput, db: Session = Depends(get_db)):
         title=data.title,
         content=data.content,
         user_id=data.user_id,
-        image_url=data.image_url
+        image_url=data.image_url,
+        category_code=data.category_code
     )
     
     db.add(new_feed)     # DB에 올리기
@@ -270,7 +287,8 @@ async def user_input(data: UserInput, db: Session = Depends(get_db)):
         "user_id": str(new_feed.user_id),
         "title": new_feed.title,
         "content": new_feed.content,
-        "image_url": new_feed.image_url
+        "image_url": new_feed.image_url,
+        "category_code": new_feed.category_code
     }
 
 # [API] 게시글 수정 (Update)
@@ -293,7 +311,8 @@ async def update_feed(feed_id: int, data: FeedUpdate, db: Session = Depends(get_
         "user_id": str(feed.user_id),
         "title": feed.title,
         "content": feed.content,
-        "image_url": feed.image_url
+        "image_url": feed.image_url,
+        "category_code" : feed.category_code
     }
 
 # [API] 게시글 목록 조회 (Read)
@@ -302,6 +321,18 @@ async def get_data(db: Session = Depends(get_db)):
     feeds = db.query(Feed).all()
     return feeds
 
+# 삭제 버튼
+@app.delete("/feed/{feed_id}")
+async def delete_feed(feed_id: int, db: Session = Depends(get_db)):
+    feed = db.query(Feed).filter(Feed.id == feed_id).first()
+    if not feed:
+        raise HTTPException(status_code=404, detail="게시글을 찾을 수 없습니다.")
+    db.delete(feed)
+    db.commit()
+    return {"result": "success"}
+
+
+#----------------------------------------------------------------------------------------------
 
 
 if __name__ == "__main__":
