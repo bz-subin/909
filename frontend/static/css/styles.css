@@ -291,10 +291,54 @@ input, button {
 }
 
 .input-container {
+  position: relative; /* Add this to allow absolute positioning of children */
   display: flex;
   align-items: center;
   gap: 0.75rem;
   margin-bottom: 0.75rem;
+}
+
+.autocomplete-list {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-top: none;
+  border-radius: 0 0 0.5rem 0.5rem;
+  box-shadow: var(--shadow-md);
+  z-index: 100;
+  max-height: 200px;
+  overflow-y: auto;
+  display: none; /* Hidden by default */
+}
+
+.autocomplete-list ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.autocomplete-list li {
+  padding: 0.75rem 1rem;
+  cursor: pointer;
+  font-size: 0.875rem;
+}
+
+.autocomplete-list li:hover {
+  background-color: #f8fafc;
+}
+
+.autocomplete-list li .place-name {
+  font-weight: 500;
+  color: var(--text-main);
+}
+
+.autocomplete-list li .address-name {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-top: 2px;
 }
 
 .dot-start {
