@@ -40,15 +40,28 @@ function initializeNavigation() {
 
 /**
  * [기능] 입력 필드의 키워드를 기반으로 장소를 검색하고, 자동완성 목록을 표시합니다.
- * `ps = new kakao.maps.services.Places()` 객체는 이 함수가 호출될 때마다 생성되어
- * `kakao.maps` 객체가 완전히 로드되었음을 보장합니다.
+ * `kakao.maps.services` 라이브러리가 로드되지 않았을 경우를 대비하여 재시도 로직을 포함한 예외 처리를 수행합니다.
  *
  * @param {HTMLInputElement} inputElement - 현재 입력 중인 input 요소 (`#origin` 또는 `#destination`)
  * @param {'origin' | 'destination'} type - 입력 필드의 종류 (출발지 또는 도착지)
+ * @param {number} [retryCount=0] - 재시도 횟수. 5번 이상 실패하면 사용자에게 알림.
  */
-function searchPlaces(inputElement, type) {
-    // Places 서비스 객체를 함수 내부에서 생성하여, Kakao Maps API 로딩 완료 후 사용을 보장합니다.
-    // 이는 `map.js`의 `kakao.maps.load` 콜백 내에서 `initializeNavigation`이 호출되므로 가능합니다.
+function searchPlaces(inputElement, type, retryCount = 0) {
+    // kakao.maps.services 객체가 로드되었는지 확인합니다.
+    if (typeof kakao.maps.services === 'undefined' || typeof kakao.maps.services.Places === 'undefined') {
+        // 5번 이상 재시도했다면 에러 알림 후 종료
+        if (retryCount >= 5) {
+            alert('장소 검색 서비스를 불러오는 데 실패했습니다. 페이지를 새로고침해주세요.');
+            return;
+        }
+        // 100ms 후 자기 자신을 다시 호출하여 재시도합니다.
+        setTimeout(() => {
+            searchPlaces(inputElement, type, retryCount + 1);
+        }, 100);
+        return;
+    }
+
+    // Places 서비스 객체를 함수 내부에서 안전하게 생성합니다.
     const ps = new kakao.maps.services.Places();
     
     const keyword = inputElement.value; // 현재 입력 필드의 값
@@ -72,6 +85,7 @@ function searchPlaces(inputElement, type) {
         }
     });
 }
+
 
 /**
  * [기능] 검색된 장소 목록을 자동완성 UI (`<ul>` 태그)에 표시합니다.
