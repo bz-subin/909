@@ -29,8 +29,9 @@ async function connectKakaomap() {
         // 스크립트의 타입을 'text/javascript'로 설정합니다.
         script.type = 'text/javascript';
         // API 로딩이 완료되면 자동으로 실행되지 않도록 `autoload=false` 파라미터를 추가합니다.
-        script.src = `https://dapi.kakao.com/v2/maps/sdk.js?appkey=${KAKAO_MAP_KEY}&autoload=false`;
-        console.log("1")
+        // `libraries=services`는 Kakao Maps Places (장소 검색) 기능을 사용하기 위해 필수적입니다.
+        // 이 라이브러리가 로드되어야 `kakao.maps.services.Places` 객체를 사용할 수 있습니다.
+        script.src = `https://dapi.kakao.com/v2/maps/sdk.js?appkey=${KAKAO_MAP_KEY}&libraries=services&autoload=false`;
 
         // 생성된 스크립트 태그를 문서의 'head'에 추가합니다.
         document.head.appendChild(script);
@@ -38,11 +39,10 @@ async function connectKakaomap() {
         // 스크립트 로딩이 완료되면 실행될 콜백 함수를 정의합니다.
         script.onload = () => {
             // 카카오맵 API를 로드합니다.
-        console.log("2")
             kakao.maps.load(() => {
                 // 지도를 표시할 HTML 요소를 가져옵니다.
                 const mapContainer = document.getElementById('map');
-                // [설정 필요] 지도의 초기 중심 좌표입니다. (대전역)
+                // 지도의 초기 중심 좌표입니다. (예: 대전역)
                 const center = new kakao.maps.LatLng(36.3326, 127.4342);
 
                 // 지도 생성 옵션을 설정합니다.
@@ -56,6 +56,12 @@ async function connectKakaomap() {
 
                 // 지도 객체 생성 직후 대전 지역 제한 함수를 호출합니다.
                 deajeonlimit();
+
+                // 내비게이션 기능 초기화
+                // `navigation.js`의 initializeNavigation 함수를 호출하여 장소 검색 및 경로 관련 이벤트 리스너를 설정합니다.
+                // 이 호출은 `kakao.maps` 객체와 필요한 라이브러리(`services`)가 모두 로드된 후에 실행되므로,
+                // `Uncaught TypeError: Cannot read properties of undefined (reading 'Places')`와 같은 오류를 방지합니다.
+                initializeNavigation();
             });
         };
     } catch (error) {
