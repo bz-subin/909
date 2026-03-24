@@ -26,6 +26,7 @@ DATABASE_URL = os.getenv("DB_URL")
 # Kakao API 호출에 사용될 애플리케이션 키. .env 파일에서 KAKAO_API_KEY 환경 변수를 로드합니다.
 # 이 키는 Kakao Local API (주소 검색) 및 Kakao Navi API (길찾기) 호출 시 인증에 사용됩니다.
 KAKAO_API_KEY = os.getenv("KAKAO_API_KEY")
+KAKAO_RESTAPI = os.getenv("KAKAO_RESTAPI") # env에 넣을거임 
 
 
 # --- [DB] SQLAlchemy 연결 설정 ---
@@ -193,7 +194,12 @@ async def signup(request: Request):
 
 @app.get("/map", response_class=HTMLResponse)
 async def map_page(request: Request):
-    return templates.TemplateResponse("index.html", {"request": request})
+    return templates.TemplateResponse("index.html", {
+        "request": request,
+        "kakao_key": os.getenv("KAKAO_RESTAPI")  #이 부분 추가 
+    })
+
+
 
 # Kakao Maps API 키를 클라이언트에 제공하는 엔드포인트
 # 이 키는 map.js에서 Kakao 지도 SDK를 동적으로 로드하는 데 사용됩니다.
@@ -354,6 +360,14 @@ async def community_page(request: Request):
     })
 
 
+# restapi 키 Index로 보냄(js에서 쓸 수 있게)
+@app.get("/index.html")  # 보통 메인 페이지는 주소를 / 로 씁니다.
+async def index_page(request: Request):
+    # index.html에서도 Supabase를 써야 한다면 키값을 똑같이 넘겨줍니다.
+    return templates.TemplateResponse("index.html", {
+        "request": request,
+        "kakao_key": os.getenv("KAKAO_RESTAPI")
+    })
 #!--------------------------------------------------------------------------------------------------sb
 
 
