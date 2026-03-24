@@ -62,6 +62,7 @@ async function connectKakaomap() {
                 // 이 호출은 `kakao.maps` 객체와 필요한 라이브러리(`services`)가 모두 로드된 후에 실행되므로,
                 // `Uncaught TypeError: Cannot read properties of undefined (reading 'Places')`와 같은 오류를 방지합니다.
                 initializeNavigation();
+                initPlacesService();
             });
         };
     } catch (error) {
