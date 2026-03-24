@@ -155,8 +155,8 @@
     <script src="/static/js/navigation.js"></script>
 
     <script> //py에서 받은 키값을 js에서 쓸 수 있게 전역 변수처리
-        const SUPABASE_URL = "{{ supabase_url }}";
-        const SUPABASE_KEY = "{{ supabase_key }}";
+        window.SUPABASE_URL = "{{ supabase_url }}";
+        window.SUPABASE_KEY = "{{ supabase_key }}";
     </script>
     <script src="/static/js/community.js" type="module"></script> <!--*js 로직 분리-->
 
