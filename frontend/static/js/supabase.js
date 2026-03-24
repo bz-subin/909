@@ -1,25 +1,12 @@
-// Supabase Mock Initializer
-// Once you register at Supabase.com, replace these with your actual details.
-const SUPABASE_URL = "YOUR_SUPABASE_PROJECT_URL";
-const SUPABASE_ANON_KEY = "YOUR_SUPABASE_ANON_KEY";
+// [주석: 백엔드에서 전달받은 진짜 설정값으로 교체!]
+const SUPABASE_URL = window.SUPABASE_CONFIG.url; 
+const SUPABASE_ANON_KEY = window.SUPABASE_CONFIG.key;
 
-// For now, this file just exists so the project is prepared for real implementation
-console.log("Supabase Mock Connected! Replace keys in static/js/supabase.js to go live.");
+// 전역 변수 생성 (이름 통일)
+// [주의] HTML에 supabase-js CDN이 먼저 로드되어 있어야 'supabase' 객체를 쓸 수 있어요!
+const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-// Mock functions to simulate DB behavior
-const supabaseMock = {
-    fetchPlaces: async () => {
-        return [
-            { id: 1, name: "Starfield Library", category: "도서관" },
-            { id: 2, name: "대전 고", category: "교육" }
-        ];
-    },
-    login: async (username, password) => {
-        if(username && password) {
-            return { user: { username }, error: null };
-        }
-        return { user: null, error: "Invalid credentials" };
-    }
-};
+// 다른 파일(저장 버튼 로직 등)에서도 쓸 수 있게 등록
+window.supabase = supabase;
 
-window.supabaseMock = supabaseMock;
+console.log("백엔드 환경변수를 통해 Supabase 연결 완료! 🚀");

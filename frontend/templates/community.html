@@ -174,10 +174,12 @@
 
         </div>
     </div>
+    <script src="frontend/static/js/supabase.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
 
 
     <script> 
-
+//------------------------------------------------------------------------------------------------------------------
         // 1. input 태그 가져오기
         const input_file = document.querySelector('#input-file');
         const input_file_add = document.querySelector('#input-file-add');
@@ -198,14 +200,60 @@
             }
         });
 
-        // 3. 업로드 버튼 클릭 시 (Phase 4 준비)
-        input_file_add.addEventListener('click', () => {
+        // handleUpload 함수
+        input_file_add.addEventListener('click', async () => {
+            
+            // 1. 파일이 선택되었는지 먼저 확인
             if (!selectedFile) {
                 alert("먼저 파일을 선택해주세요!");
                 return;
             }
-            console.log("이제 이 파일을 Supabase로 보낼 겁니다:", selectedFile.name);
+
+            try {
+                // [ ] 파일 이름 중복 방지를 위해 현재 시간(밀리초) 준비하기
+                // 예: 1715832000000_myphoto.png 형태로 저장됩니다.
+                const fileExt = selectedFile.name.split('.').pop(); // 확장자 추출 (png, jpg 등)
+                const fileName = `${Date.now()}.${fileExt}`; 
+
+                console.log("업로드 시작할 파일명:", fileName);
+
+                // [ ] supabase.storage.from('내버킷이름').upload(...) 코드 한 줄 적기
+                // [ ] await 키워드 잊지 않았는지 체크하기!
+                const { data, error } = await supabase.storage
+                    .from('avatars') // 👈 중요: 본인이 Supabase에서 만든 '버킷 이름'으로 꼭 바꾸세요!
+                    .upload(fileName, selectedFile);
+
+                // [ ] 업로드 성공 후 data와 error 로그 찍어보기
+                if (error) {
+                    console.error("❌ 업로드 에러 발생:", error.message);
+                    alert("업로드 실패: " + error.message);
+
+                } 
+                else {
+                    console.log("✅ 업로드 성공! 결과 데이터:", data);
+
+                    // [ ] 1. getPublicUrl() 호출해서 이미지 주소 따오기
+                    const { data: urlData } = supabase.storage
+                        .from('avatars') // 내 버킷 이름 똑같이!
+                        .getPublicUrl(fileName); // 아까 만든 파일명 그대로!
+
+                    const publicUrl = urlData.publicUrl;
+                    console.log("획득한 이미지 URL:", publicUrl);
+
+                    // [ ] 2. img 태그의 src에 넣어서 화면에 띄워보기
+                    // HTML에 <img id="preview-img"> 가 있다고 가정할게요.
+                    const myImg = document.querySelector('#preview-img');
+                    if (myImg) {
+                        myImg.src = publicUrl;
+                    }
+
+                    alert("성공! 화면에서 이미지를 확인하세요.");
+                }
+            } catch (err) {
+                console.error("예상치 못한 오류:", err);
+            }
         });
+
 
 
         // ==========================================
@@ -333,7 +381,7 @@
         document.getElementById('btn-write-save').addEventListener('click', async () => {
             const title = document.getElementById('input_title').value;
             const content = document.getElementById('input_content').value;
-            const fileInput = document.getElementById('input_file');
+            const fileInput = document.getElementById('input-file');
             const category = document.getElementById('input_category').value; 
             const file = fileInput.files[0];
             if(!title || !content) return alert("제목과 내용을 입력하세요.");
@@ -343,10 +391,10 @@
                 // 1. 파일이 있다면 Supabase Storage에 업로드
                 if (file) {
                     const fileName = `feed/${Date.now()}_${file.name}`;
-                    const { data, error } = await supabaseClient.storage.from('images').upload(fileName, file);
+                    const { data, error } = await supabase.storage.from('images').upload(fileName, file);
                     if (error) throw error;
                     // Public URL 가져오기
-                    const { data: publicUrlData } = supabaseClient.storage.from('images').getPublicUrl(fileName);
+                    const { data: publicUrlData } = supabase.storage.from('images').getPublicUrl(fileName);
                     input_img_url = publicUrlData.publicUrl;
                 }
 
@@ -444,16 +492,16 @@
                             if(oldPath) {
                                 // URL 디코딩 필요할 수 있음
                                 const decodedPath = decodeURIComponent(oldPath);
-                                await supabaseClient.storage.from('images').remove([decodedPath]);
+                                await supabase.storage.from('images').remove([decodedPath]);
                             }
                         } catch(e) { console.log("기존 이미지 삭제 실패/무시", e); }
                     }
                     
                     // 새 파일 업로드
                     const fileName = `feed/${Date.now()}_updated_${newFile.name}`;
-                    const { error } = await supabaseClient.storage.from('images').upload(fileName, newFile);
+                    const { error } = await supabase.storage.from('images').upload(fileName, newFile);
                     if (error) throw error;
-                    const { data: urlData } = supabaseClient.storage.from('images').getPublicUrl(fileName);
+                    const { data: urlData } = supabase.storage.from('images').getPublicUrl(fileName);
                     edit_img_url = urlData.publicUrl;
                 }
 

@@ -137,6 +137,13 @@
         // 이 함수 내에서 Kakao Maps API 및 필요한 서비스(`services`)가 로드된 후,
         // `initializeNavigation()` 함수가 호출되어 검색 자동 완성 및 경로 관련 이벤트 리스너가 설정됩니다.
         connectKakaomap();
+        // [주석: 백엔드에서 넘겨준 카카오 API 키를 JS 변수로 저장]
+
+        const kakaoKey = "{{ kakao_key }}";
+        window.KAKAO_REST_API = kakaoKey;
+        connectKakaomap(); // 키를 먼저 세팅하고 호출!
+
+
     </script>
     <script>
         const penguinButton = document.getElementById('penguinButton');

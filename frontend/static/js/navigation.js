@@ -183,7 +183,8 @@ async function runNavigation() {
         // 👉 실서비스는 백엔드로 옮겨라
         // ==============================
 
-        const KAKAO_REST_API = "9d24a7ce098f8471df6a3f1802dde837";
+        //TODO api 키 가릴것.
+        // const KAKAO_REST_API = "9d24a7ce098f8471df6a3f1802dde837"; 
 
         // ==============================
         // 🔥 Kakao Mobility API 호출
@@ -204,6 +205,7 @@ async function runNavigation() {
         }
 
         const data = await response.json();
+        const url = `https://apis-navi.kakaomobility.com/v1/directions?origin=${origin}&destination=${destination}&appkey=${window.KAKAO_REST_API}`;
 
         // ==============================
         // 🔥 Python 로직 그대로: vertexes 추출
