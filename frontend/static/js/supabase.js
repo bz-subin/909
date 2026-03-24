@@ -1,7 +1,10 @@
 // Supabase Mock Initializer
 // Once you register at Supabase.com, replace these with your actual details.
+
+//스토리지 초기 설정
 const SUPABASE_URL = "YOUR_SUPABASE_PROJECT_URL";
 const SUPABASE_ANON_KEY = "YOUR_SUPABASE_ANON_KEY";
+const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
 
 // For now, this file just exists so the project is prepared for real implementation
 console.log("Supabase Mock Connected! Replace keys in static/js/supabase.js to go live.");
