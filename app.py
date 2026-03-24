@@ -368,6 +368,14 @@ async def index_page(request: Request):
         "request": request,
         "kakao_key": os.getenv("KAKAO_RESTAPI")
     })
+
+
+# 카테고리 js에서 보낸 요청 받기(라우터)
+# html을 랜더링하여 응답
+@app.get("/community")
+async def community(request: Request):
+    return templates.TemplateResponse("community.html", {"request": request})
+
 #!--------------------------------------------------------------------------------------------------sb
 
 
