@@ -128,7 +128,8 @@
                     <textarea id="input_content" rows="4" placeholder="내용"></textarea> <!--*내용-->
                 </div>
                 <div class="input-group">
-                    <input type="file" id="input_file" accept="image/*"> <!--*이미지-->
+                    <input type="file" id="input-file" accept="image/*"> <!--*이미지-->
+                    <button id="input-file-add">추가</button>  <!--*추가-->
                 </div>
                 <div class="btn-group">
                     <button id="btn-write-save" class="btn btn-primary">저장</button>  <!--*저장-->
@@ -143,7 +144,6 @@
                 <p id="view_category" style="color: #f97316;"></p>  <!-- 추가 -->
                 <p id="view_content" style="white-space: pre-wrap; color: #334155;"></p>
                 <div class="btn-group">
-                    <button id="btn-delete" class="btn btn-secondary btn-close-modal">삭제</button>  <!--수빈-->
                     <button id="btn-to-edit" class="btn btn-primary hidden">수정</button>
                     <button class="btn btn-secondary btn-close-modal">닫기</button>
                 </div>
@@ -177,6 +177,37 @@
 
 
     <script> 
+
+        // 1. input 태그 가져오기
+        const input_file = document.querySelector('#input-file');
+        const input_file_add = document.querySelector('#input-file-add');
+
+
+        // [ ] 선택된 파일을 담을 변수 (State 역할)
+        let selectedFile = null; 
+
+        // 2. 'change' 이벤트 연결
+        input_file.addEventListener('change', (e) => {
+            // [ ] 파일 데이터가 잘 잡히는지 확인
+            const file = e.target.files[0];
+
+            if (file) {
+                selectedFile = file; // [ ] 변수(state)에 파일 담기
+                console.log("선택된 파일 정보:", selectedFile);
+                console.log("파일명:", selectedFile.name);
+            }
+        });
+
+        // 3. 업로드 버튼 클릭 시 (Phase 4 준비)
+        input_file_add.addEventListener('click', () => {
+            if (!selectedFile) {
+                alert("먼저 파일을 선택해주세요!");
+                return;
+            }
+            console.log("이제 이 파일을 Supabase로 보낼 겁니다:", selectedFile.name);
+        });
+
+
         // ==========================================
         // [JavaScript] CSR 로직 및 이벤트 핸들러
         // ==========================================
