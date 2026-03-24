@@ -290,11 +290,62 @@ input, button {
   color: var(--text-muted);
 }
 
+/* 출발지/도착지 입력 필드를 감싸는 컨테이너 */
 .input-container {
+  position: relative; /* 자동완성 목록의 절대 위치 지정을 위해 필요 */
   display: flex;
   align-items: center;
   gap: 0.75rem;
   margin-bottom: 0.75rem;
+}
+
+/* 자동완성 검색 결과 목록 컨테이너 스타일 */
+.autocomplete-list {
+  position: absolute; /* 입력 필드 바로 아래에 위치 */
+  top: 100%; /* 입력 필드 높이만큼 아래로 */
+  left: 0;
+  right: 0;
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-top: none; /* 상단 테두리 제거 (입력 필드와 자연스럽게 연결) */
+  border-radius: 0 0 0.5rem 0.5rem; /* 하단만 둥글게 */
+  box-shadow: var(--shadow-md);
+  z-index: 100; /* 다른 요소 위에 표시 */
+  max-height: 200px; /* 최대 높이 설정 후 스크롤바 표시 */
+  overflow-y: auto;
+  display: none; /* 기본적으로 숨김 */
+}
+
+/* 자동완성 목록 내부의 `ul` 태그 초기화 */
+.autocomplete-list ul {
+  list-style: none; /* 목록 마커 제거 */
+  margin: 0;
+  padding: 0;
+}
+
+/* 자동완성 목록의 각 항목(`li`) 스타일 */
+.autocomplete-list li {
+  padding: 0.75rem 1rem;
+  cursor: pointer; /* 클릭 가능한 요소임을 나타냄 */
+  font-size: 0.875rem;
+}
+
+/* 목록 항목에 마우스를 올렸을 때의 배경색 변경 */
+.autocomplete-list li:hover {
+  background-color: #f8fafc;
+}
+
+/* 장소 이름 텍스트 스타일 */
+.autocomplete-list li .place-name {
+  font-weight: 500;
+  color: var(--text-main);
+}
+
+/* 주소 텍스트 스타일 */
+.autocomplete-list li .address-name {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-top: 2px;
 }
 
 .dot-start {
@@ -713,4 +764,3 @@ input, button {
 }
 
 /* Icons via unicons or simple text/SVG in HTML */
-

@@ -3,57 +3,37 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Daejeon Community - {{ place_name }}</title>
+    <title>Daejeon Community - {{ place_name }}</title>  <!--이거 어디서 가져오는거임???????-->
     <link rel="stylesheet" href="/static/css/styles.css">
+    <link rel="stylesheet" href="/static/css/community.css">
     
-    <style>
-        /* --- [스타일 정의] --- */
-        
-        /* 모달 및 추가 스타일 */
-        .modal-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.5); display: none;
-            justify-content: center; align-items: center; z-index: 1000;
-        }
-        .modal-overlay.show { display: flex; }
-        .modal-box {
-            background: white; padding: 2rem; border-radius: 1rem;
-            width: 90%; max-width: 500px; max-height: 90vh; overflow-y: auto;
-        }
-        .hidden { display: none !important; }
-        .post-card { cursor: pointer; border: 1px solid #e2e8f0; padding: 1.5rem; margin-bottom: 1rem; border-radius: 0.5rem; background: #fff; }
-        .post-card img { max-width: 100%; height: auto; margin-top: 10px; border-radius: 8px; }
-        
-        /* 폼 스타일 */
-        .input-group { margin-bottom: 1rem; }
-        .input-group input[type="text"], .input-group textarea {
-            width: 100%; padding: 0.75rem; border: 1px solid #cbd5e1; border-radius: 0.5rem;
-        }
-        /* 로딩 바 */
-        #progress-bar {
-            position: fixed; top: 0; left: 0; height: 4px; background-color: #0ea5e9; 
-            width: 0%; transition: width 0.3s; z-index: 2000;
-        }
-    </style>
 </head>
 
 <body class="bg-gray-50">
-    <!-- 로딩 상태 표시 바 -->
-    <div id="progress-bar"></div>
 
     <!--헤더-->
     <header class="community-header">
         <div class="header-inner">
             <div class="header-left">
                 
-                <button class="back-btn" onclick="window.location.href='/map'">
-                    <img src="/static/images/펭귄 이미지.jpg" alt="Logo" onerror="this.src='https://via.placeholder.com/64'">
+                <!--상단 로고(이미지) 클릭 시 /map으로 이동-->
+                <button class="back-btn" onclick="window.location.href='/map'">  
+                    <img src="/static/image/cha.jpg"> <!--static 안으로 바꿔야 한다고 함.-->
                 </button>
 
-                <h1 style="font-size: 1.25rem;">{{ place_name }}</h1> 
+                <h1 style="font-size: 1.25rem;">{{ place_name }}</h1>  <!--플레이스 이름-->
+
+                <select id="category-filter">  <!--카테고리 select 추가-->
+                    <option value="">전체</option>
+                    <option value="음식">음식</option>
+                    <option value="영화">영화</option>
+                    <option value="문화">문화</option>
+                    <option value="쇼핑">쇼핑</option>
+                </select>
+
             </div>
             <div>
-                <!-- 글 작성 모달 열기 버튼 -->
+                <!--* 글 작성 모달 버튼 -->
                 <button class="btn-primary" id="btn-open-write">게시글 작성</button>
             </div>
         </div>
@@ -65,8 +45,8 @@
 
             <div class="top-bar"> <!-- 검색 및 탭 영역 -->
                 <div class="search-wrapper">   <!--검색창-->
-                    <span class="search-icon">🔍</span> 
                     <input type="text" placeholder="대전의 편의 위치 추천해 슈퍼미 모두같은 명소를 찾고싶어요">
+                    <button class="search_btn">🔍</button>
                 </div>
 
                 <div class="tabs">   <!--검색창 밑 버튼(전체, 추천순, 최신, 리뷰, 사진)-->
@@ -78,20 +58,23 @@
                 </div>
             </div>
 
-            <!-- [게시글 목록 영역] JS로 데이터가 로드되면 이곳에 카드가 추가됩니다 -->
-            <div class="post-list" id="postList"></div>
+            
+            <div class="post-list" id="postList">
+                <!--! 피드 추가될 부분 -->
             </div>
         </main>
+    </div>
+
 
 
         <aside class="right-sidebar"> <!-- 인기 장소-->
 
             <div class="widget">
                 <div class="widget-title">
-                    <span style="color: #f97316;">📈</span> 내 주변 인기 장소
+                    <h4 style="color: #000000;">내 주변 인기 장소</h4> 
                 </div>
 
-                <div class="popular-place"> <!--피드-->
+                <div class="popular-place"> <!--장소 1위-->
                     <div class="rank">01</div>
                     <div>
                         <h4 style="font-size: 0.875rem;">판암수족관</h4>
@@ -99,7 +82,7 @@
                     </div>
                 </div>
 
-                <div class="popular-place">
+                <div class="popular-place"> <!--장소 2위-->
                     <div class="rank">02</div>
                     <div>
                         <h4 style="font-size: 0.875rem;">스마더프로 쇼핑</h4>
@@ -107,7 +90,7 @@
                     </div>
                 </div>
 
-                <div class="popular-place">
+                <div class="popular-place"> <!--장소 3위-->
                     <div class="rank">03</div>
                     <div>
                         <h4 style="font-size: 0.875rem;">류성준탑</h4>
@@ -116,39 +99,49 @@
                 </div>
             </div>
 
-            <div class="widget fancy-widget" style="position: relative; overflow: hidden">  <!--css-->
-                <div style="display: flex; gap: 1rem; align-items: flex-start;">
-
         </aside>
-    </div>
 
 
-    <!-- [통합 모달] 작성(Create), 상세(Read), 수정(Update) 기능을 하나의 모달에서 처리 -->
+
+    <!-- *모달 안 작성, 상세(Read), 수정 -->
     <div id="div_modal" class="modal-overlay">
         <div class="modal-box">
             
-            <!-- 1. 작성 모드 영역 -->
+            <!-- 게시글 작성 모달 -->
             <div id="write-section" class="hidden">
                 <h3>게시글 작성</h3>
+
                 <div class="input-group">
-                    <input type="text" id="input_title" placeholder="제목">
+                    <select id="input_category">   <!-- 추가 -->
+                        <option value="">카테고리 선택</option>
+                        <option value="음식">음식</option>
+                        <option value="영화">영화</option>
+                        <option value="문화">문화</option>
+                        <option value="쇼핑">쇼핑</option>
+                    </select>
+                </div>
+
+                <div class="input-group">
+                    <input type="text" id="input_title" placeholder="제목">  <!--*제목-->
                 </div>
                 <div class="input-group">
-                    <textarea id="input_content" rows="4" placeholder="내용"></textarea>
+                    <textarea id="input_content" rows="4" placeholder="내용"></textarea> <!--*내용-->
                 </div>
                 <div class="input-group">
-                    <input type="file" id="input_file" accept="image/*">
+                    <input type="file" id="input-file" accept="image/*"> <!--*이미지-->
+                    <button id="input-file-add">추가</button>  <!--*추가-->
                 </div>
                 <div class="btn-group">
-                    <button id="btn-write-save" class="btn btn-primary">저장</button>
-                    <button class="btn btn-secondary btn-close-modal">닫기</button>
+                    <button id="btn-write-save" class="btn btn-primary">저장</button>  <!--*저장-->
+                    <button class="btn btn-secondary btn-close-modal">닫기</button>  <!--*닫기-->
                 </div>
             </div>
 
-            <!-- 2. 상세 보기 모드 영역 -->
+            <!-- 상세 보기 모달 -->
             <div id="view-section" class="hidden">
                 <h3 id="view_title"></h3>
                 <div id="view_img_area" style="margin-bottom: 1rem;"></div>
+                <p id="view_category" style="color: #f97316;"></p>  <!-- 추가 -->
                 <p id="view_content" style="white-space: pre-wrap; color: #334155;"></p>
                 <div class="btn-group">
                     <button id="btn-to-edit" class="btn btn-primary hidden">수정</button>
@@ -156,7 +149,8 @@
                 </div>
             </div>
 
-            <!-- 3. 수정 모드 영역 -->
+            
+            <!-- 수정 모달 -->
             <div id="edit-section" class="hidden">
                 <h3>게시글 수정</h3>
                 <div class="input-group">
@@ -183,15 +177,40 @@
 
 
     <script> 
+
+        // 1. input 태그 가져오기
+        const input_file = document.querySelector('#input-file');
+        const input_file_add = document.querySelector('#input-file-add');
+
+
+        // [ ] 선택된 파일을 담을 변수 (State 역할)
+        let selectedFile = null; 
+
+        // 2. 'change' 이벤트 연결
+        input_file.addEventListener('change', (e) => {
+            // [ ] 파일 데이터가 잘 잡히는지 확인
+            const file = e.target.files[0];
+
+            if (file) {
+                selectedFile = file; // [ ] 변수(state)에 파일 담기
+                console.log("선택된 파일 정보:", selectedFile);
+                console.log("파일명:", selectedFile.name);
+            }
+        });
+
+        // 3. 업로드 버튼 클릭 시 (Phase 4 준비)
+        input_file_add.addEventListener('click', () => {
+            if (!selectedFile) {
+                alert("먼저 파일을 선택해주세요!");
+                return;
+            }
+            console.log("이제 이 파일을 Supabase로 보낼 겁니다:", selectedFile.name);
+        });
+
+
         // ==========================================
         // [JavaScript] CSR 로직 및 이벤트 핸들러
         // ==========================================
-
-        // TODO: 본인의 Supabase 설정으로 교체하세요.
-        const SUPABASE_URL = 'https://YOUR_SUPABASE_PROJECT.supabase.co'; // 프로젝트 URL
-        const SUPABASE_KEY = 'YOUR_SUPABASE_ANON_KEY'; // 익명 키
-        const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-        
         let all_feed = [];
         let selected_feed = null;
         let login_user_id = null;
@@ -199,27 +218,42 @@
 
         const div_feed_list = document.getElementById('postList');
         const div_modal = document.getElementById('div_modal');
-        const progressBar = document.getElementById('progress-bar');
 
-        // --- [초기화] DOM 로드 시 로그인 체크 및 데이터 로딩 ---
+
+
+// 테스트용 로그인(밑에꺼 살리고 지우면 되는듯)
         window.addEventListener('DOMContentLoaded', async () => {
-            // 로그인 체크 (localStorage 사용 시뮬레이션)
-            const storedUser = localStorage.getItem('login_user_id');
-            if (!storedUser) {
-                alert("로그인이 필요합니다."); 
-                window.location.href = "/"; // 로그인 페이지 리다이렉트
-                return;
-            }
-            login_user_id = storedUser;
-            console.log("Logged in user:", login_user_id);
-
-            // 전체 피드 불러오기
+            login_user_id = "86f71765-646e-4d7c-b4da-0eb270765fd2"; // 로그인 체크 임시 스킵
             await fetchAllFeeds();
+
+            // URL에서 category 읽어서 select 기본값 설정
+            const urlParams = new URLSearchParams(window.location.search);
+            const categoryFromUrl = urlParams.get('category');
+            if (categoryFromUrl) {
+                document.getElementById('category-filter').value = categoryFromUrl;
+            }
         });
+
+//---------------------------------------------------------------------------------
+        // // --- [초기화] DOM 로드 시 로그인 체크 및 데이터 로딩 ---
+        // window.addEventListener('DOMContentLoaded', async () => {
+        //     // 로그인 체크 (localStorage 사용 시뮬레이션)
+        //     const storedUser = localStorage.getItem('login_user_id');
+        //     if (!storedUser) {
+        //         alert("로그인이 필요합니다."); 
+        //         window.location.href = "/"; // 로그인 페이지 리다이렉트
+        //         return;
+        //     }
+        //     login_user_id = storedUser;
+        //     console.log("Logged in user:", login_user_id);
+
+        //     // 전체 피드 불러오기
+        //     await fetchAllFeeds();
+        // });
+//---------------------------------------------------------------------------------
 
         // --- [조회] 서버에서 전체 게시글 불러오기 (GET) ---
         async function fetchAllFeeds() {
-            setLoading(true);
             try {
                 const res = await fetch('/get_data');
                 all_feed = await res.json();
@@ -227,8 +261,6 @@
             } catch (err) {
                 console.error(err);
                 div_feed_list.innerHTML = "피드를 불러오는데 실패했습니다.";
-            } finally {
-                setLoading(false);
             }
         }
 
@@ -262,10 +294,20 @@
                 imgTag = `<img src="${feed.image_url}" alt="image">`;
             }
 
+
+            // 삭제 버튼 클릭시
+            const deleteBtn = String(feed.user_id) === String(login_user_id) 
+                ? `<button onclick="event.stopPropagation(); deleteFeed(${feed.id})">삭제</button>` 
+                : '';
+
+
             div.innerHTML = `
                 <h3>${feed.title}</h3>
                 <p>${shortContent}</p>
+                ${feed.category_code ? `<span>${feed.category_code}</span>` : ''}
                 ${imgTag}
+                ${deleteBtn}
+                
             `;
 
             // 카드 클릭 시 상세 모달 열기 이벤트 연결
@@ -292,11 +334,10 @@
             const title = document.getElementById('input_title').value;
             const content = document.getElementById('input_content').value;
             const fileInput = document.getElementById('input_file');
+            const category = document.getElementById('input_category').value; 
             const file = fileInput.files[0];
-
             if(!title || !content) return alert("제목과 내용을 입력하세요.");
 
-            setLoading(true);
             try {
                 let input_img_url = null;
                 // 1. 파일이 있다면 Supabase Storage에 업로드
@@ -317,7 +358,8 @@
                         title: title,
                         content: content,
                         user_id: login_user_id,
-                        image_url: input_img_url
+                        image_url: input_img_url,
+                        category_code: category 
                     })
                 });
                 if(!res.ok) throw new Error("저장 실패");
@@ -334,10 +376,9 @@
             } catch (err) {
                 console.error(err);
                 alert("오류 발생: " + err.message);
-            } finally {
-                setLoading(false);
             }
         });
+
 
         // --- [상세보기] 게시글 상세 모달 열기 ---
         function openDetailModal(feed) {
@@ -347,6 +388,7 @@
             // 상세보기 영역 표시
             const viewSec = document.getElementById('view-section');
             viewSec.classList.remove('hidden');
+            document.getElementById('view_category').innerText = feed.category_code || '';
             document.getElementById('write-section').classList.add('hidden');
             document.getElementById('edit-section').classList.add('hidden');
 
@@ -388,8 +430,8 @@
             const newTitle = document.getElementById('edit_title').value;
             const newContent = document.getElementById('edit_content').value;
             const newFile = document.getElementById('edit_file').files[0];
+            const category = selected_feed.category_code;  // 추가
 
-            setLoading(true);
             try {
                 let edit_img_url = selected_feed.image_url;
 
@@ -422,7 +464,8 @@
                     body: JSON.stringify({
                         title: newTitle,
                         content: newContent,
-                        image_url: edit_img_url
+                        image_url: edit_img_url,
+                        category_code: category 
                     })
                 });
                 if(!res.ok) throw new Error("수정 실패");
@@ -445,27 +488,16 @@
             } catch (err) {
                 console.error(err);
                 alert("수정 중 오류 발생");
-            } finally {
-                setLoading(false);
             }
         });
 
-        // --- [공통] 모달 닫기 및 로딩 바 함수 ---
+        // --- [공통] 모달 닫기 ---
         document.querySelectorAll('.btn-close-modal').forEach(btn => {
             btn.addEventListener('click', closeModal);
         });
 
         function closeModal() {
             div_modal.classList.remove('show');
-        }
-
-        function setLoading(isLoading) {
-            if (isLoading) {
-                progressBar.style.width = '90%';
-            } else {
-                progressBar.style.width = '100%';
-                setTimeout(() => { progressBar.style.width = '0%'; }, 300);
-            }
         }
 
         // 모달 외부 클릭 시 닫기
@@ -475,22 +507,21 @@
             }
         });
 
-        // [참고] 테스트용: 로그인 로직이 없을 때 강제로 ID 설정하는 코드
-        // 실제 서비스 연동 시에는 상단의 DOMContentLoaded 로직을 사용하고 이 부분은 삭제해야 함
-        window.addEventListener('DOMContentLoaded', async () => {
-            // 중복 실행 방지를 위해 실제 동작 코드는 주석 처리하거나,
-            // 테스트 환경에서만 login_user_id를 강제로 주입하도록 사용
-            if (!localStorage.getItem('login_user_id')) {
-                console.log("테스트 모드: 임시 ID 할당");
-                login_user_id = "임시_테스트_UUID";
-                await fetchAllFeeds();
+
+        
+        // --- 삭제 ---
+        async function deleteFeed(feedId) {
+            if (!confirm("삭제하시겠습니까?")) return;
+            const res = await fetch(`/feed/${feedId}`, { method: 'DELETE' });
+            if (res.ok) {
+                document.getElementById(`feed-${feedId}`).remove();
+            } else {
+                alert("삭제 실패");
             }
-        });
+        }
+
 
     </script>
-
-    <!-- Supabase JS 라이브러리 (헤더 또는 바디 끝에 위치) -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 </body>
 </html>

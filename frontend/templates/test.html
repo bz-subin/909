@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <form>
+        <input type="text" id="place_name" placeholder="장소명 입력">
+        <select id="category">
+            <option value="음식">음식</option>
+            <option value="영화">영화</option>
+            <option value="문화">문화</option>
+            <option value="쇼핑">쇼핑</option>
+        </select>
+        <button type="button" onclick="goToCommunity()">확인</button>
+    </form>
+
+</body>
+
+<script>
+function goToCommunity() {  //test.html에서 받아다가 community.html로 넘김
+    const placeName = document.getElementById('place_name').value; //input으로 입력한 값을 url로 바꿈.
+    const category = document.getElementById('category').value;
+    
+    if (!placeName) {
+        alert('장소명을 입력해주세요!');
+        return;
+    }
+    
+    window.location.href = `/community/${placeName}?category=${category}`;
+}
+
+
+</script>
+
+</html>

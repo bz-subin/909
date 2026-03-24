@@ -12,7 +12,7 @@
         <aside class="sidebar">
             <div class="profile-section">
                 <div class="avatar">
-                    <img src="/static/images/펭귄 이미지.jpg" alt="Profile" onerror="this.src='https://via.placeholder.com/64'">
+                    <img src="/static/image/cha.jpg"> <!--static 안으로 바꿔야 한다고 함.-->
                 </div>
                 <div>
                     <h3 style="font-size: 1rem;">대전 고 (Daejeon Go)</h3>
@@ -24,10 +24,14 @@
                 <div class="input-container">
                     <div class="dot-start"></div>
                     <input type="text" id="origin" class="route-input" placeholder="출발지" value="">
+                    <!-- 출발지 검색 결과가 표시될 자동완성 목록 컨테이너 -->
+                    <div id="origin-results" class="autocomplete-list"></div>
                 </div>
                 <div class="input-container">
                     <div class="dot-end"></div>
                     <input type="text" id="destination" class="route-input" placeholder="도착지" value="">
+                    <!-- 도착지 검색 결과가 표시될 자동완성 목록 컨테이너 -->
+                    <div id="destination-results" class="autocomplete-list"></div>
                 </div>
                 <button class="btn-primary" style="margin-top: 0.5rem;" onclick="searchRoute()">경로 검색 하기 →</button>
             </div>
@@ -46,7 +50,7 @@
 
             <div class="stats-section">
                 <div class="avatar" style="width: 2.5rem; height: 2.5rem">
-                    <img src="/static/images/펭귄 이미지.jpg" alt="Mascot" onerror="this.src='https://via.placeholder.com/64'">
+                    <img src="/static/image/cha.jpg"> <!--static 안으로 바꿔야 한다고 함.-->
                 </div>
                 <div>
                     <p style="font-size: 0.875rem; font-weight: 500;">월별 22°C 평일!</p>
@@ -76,7 +80,7 @@
             <!-- Helper Penguin Floating -->
             <div class="helper-penguin">
                 <div class="helper-avatar">
-                    <img src="/static/images/펭귄 이미지.jpg" alt="Helper" onerror="this.src='https://via.placeholder.com/64'">
+                    <img src="/static/image/cha.jpg"> <!--static 안으로 바꿔야 한다고 함.-->
                 </div>
                 <div style="position: absolute; top: -3.5rem; right: 0; background: white; padding: 0.5rem 1rem; border-radius: 0.75rem; box-shadow: var(--shadow-md); white-space: nowrap">
                     <p style="font-size: 0.875rem; font-weight: 500">월별 22°C 평일!</p>
@@ -88,12 +92,16 @@
     </div>
 
     <!-- Kakao Map and related scripts -->
+    <!-- map.js, category.js, navigation.js 스크립트는 로드 순서가 중요합니다. -->
+    <!-- map.js가 Kakao Maps API를 로드하고 initializeNavigation을 호출하므로 가장 먼저 로드되어야 합니다. -->
     <script src="/static/js/map.js"></script>
     <script src="/static/js/category.js"></script>
+    <script src="/static/js/navigation.js"></script>
     <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            connectKakaomap();
-        });
+        // Kakao Map 연결 함수를 직접 호출하여 초기화 과정을 시작합니다.
+        // 이 함수 내에서 Kakao Maps API 및 필요한 서비스(`services`)가 로드된 후,
+        // `initializeNavigation()` 함수가 호출되어 검색 자동 완성 및 경로 관련 이벤트 리스너가 설정됩니다.
+        connectKakaomap();
     </script>
 </body>
 </html>
