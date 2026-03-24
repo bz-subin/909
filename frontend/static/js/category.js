@@ -387,10 +387,7 @@ function showPoiOverlay(poi) {
         'cursor:pointer'
     ].join(';');
     communityBtn.textContent = '커뮤니티';
-    communityBtn.onclick = function() {
-        // TODO: 커뮤니티 페이지로 이동하는 로직 추가
-        alert(poi.name + ' 커뮤니티로 이동!');
-    };
+    
 
     // 조립
     btnArea.appendChild(kakaoBtn);
