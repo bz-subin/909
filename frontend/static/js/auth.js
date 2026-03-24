@@ -131,3 +131,20 @@ window.addEventListener('DOMContentLoaded', async () => {
         console.log('❌ 세션 없음 - 로그인 필요');
     }
 });
+
+// 이렇게 변경하면 HTML 어디서든 확실하게 인식합니다.
+window.loginWithKakao = async function() {
+    console.log("🔗 카카오 로그인 버튼 클릭됨!");
+    try {
+        const { data, error } = await supabaseClient.auth.signInWithOAuth({
+            provider: 'kakao',
+            options: {
+                redirectTo: 'http://localhost:5909/map' 
+            }
+        });
+        if (error) throw error;
+    } catch (error) {
+        console.error('카카오 로그인 에러:', error.message);
+        alert('카카오 로그인 실패: ' + error.message);
+    }
+}
