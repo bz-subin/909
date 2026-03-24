@@ -102,10 +102,6 @@ async function loginWithGoogle() {
 window.addEventListener('DOMContentLoaded', async () => {
     console.log('🔍 페이지 로드 - 세션 확인 시작');
     
-    // URL에 hash가 있는지 확인 (OAuth 콜백)
-    if (window.location.hash) {
-        console.log('🔵 OAuth 콜백 감지:', window.location.hash);
-    }
     
     // 현재 세션 확인
     const { data: { session }, error } = await supabaseClient.auth.getSession();
