@@ -234,7 +234,7 @@ function filterShopsByCategory(categoryName) {
 }
 
 /**
- * 9. 마커 및 인포윈도우 렌더링
+ * 9. 마커 및 오버레이 렌더링
  * 필터링된 POI 리스트를 기반으로 실제 지도에 마커를 배치하고 클릭 이벤트를 등록합니다.
  */
 function pathShop(poiList) {
@@ -251,32 +251,167 @@ function pathShop(poiList) {
             title: poi.name,
         });
 
-        // 인포윈도우(팝업창) HTML 구성
-        var infowindow = new kakao.maps.InfoWindow({
-            content: '<div style="padding:8px;font-size:13px;min-width:150px;">' +
-                '<strong>' + poi.name + '</strong><br/>' +
-                '<span style="color:#888;font-size:11px;">' + poi.category + '</span><br/>' +
-                (poi.roadAddress || poi.address || '주소 없음') +
-                (poi.phone ? '<br/>📞 ' + poi.phone : '') +
-                (poi.placeUrl ? '<br/><a href="' + poi.placeUrl + '" target="_blank" style="color:#1a73e8;">카카오맵에서 보기</a>' : '') +
-                '</div>'
-        });
-
-        // 마커 클릭 시 인포윈도우 표시 이벤트
+        // 마커 클릭 시 오버레이 표시 이벤트
         kakao.maps.event.addListener(marker, 'click', function() {
-            // 다른 열려있는 인포윈도우 닫기
-            poiMarkersArray.forEach(function(m) {
-                if (m._infowindow) m._infowindow.close();
-            });
-            infowindow.open(window.kakaoMap, marker);
+            showPoiOverlay(poi);
         });
 
-        // 나중에 제어하기 위해 마커 객체에 인포윈도우 참조 저장
-        marker._infowindow = infowindow;
         poiMarkersArray.push(marker);
     });
 
     console.log("마커 " + poiMarkersArray.length + "개 지도에 표시");
+}
+
+/**
+ * POI 오버레이를 닫는 함수
+ */
+function closePoiOverlay() {
+    var overlay = document.getElementById('poi-overlay-container');
+    if (overlay) overlay.remove();
+}
+
+function showPoiOverlay(poi) {
+    closePoiOverlay();
+
+    var overlayContainer = document.createElement('div');
+    overlayContainer.id = 'poi-overlay-container';
+    overlayContainer.style.cssText = [
+        'position:fixed',
+        'top:0',
+        'left:0',
+        'width:100%',
+        'height:100%',
+        'background:rgba(0,0,0,0.5)',
+        'display:flex',
+        'justify-content:center',
+        'align-items:center',
+        'z-index:9999'
+    ].join(';');
+
+    var card = document.createElement('div');
+    card.style.cssText = [
+        'background:#fff',
+        'border-radius:16px',
+        'width:320px',
+        'overflow:hidden',
+        'box-shadow:0 8px 32px rgba(0,0,0,0.2)',
+        'font-family:sans-serif'
+    ].join(';');
+
+    // 카테고리별 이모지 매핑
+    var categoryEmoji = {
+        '맛집': '🍽️',
+        '카페': '☕',
+        '여행지': '🏛️',
+        '도서관': '📚',
+        '자연/공원': '🌲',
+        '기타': '📍'
+    };
+    var emoji = categoryEmoji[poi.category] || '📍';
+
+    // 사진 영역 (카카오 API 사진 미제공 → 카테고리 이모지로 대체)
+    var imgArea = document.createElement('div');
+    imgArea.style.cssText = [
+        'width:100%',
+        'height:140px',
+        'background:linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+        'display:flex',
+        'align-items:center',
+        'justify-content:center',
+        'font-size:56px'
+    ].join(';');
+    imgArea.textContent = emoji;
+
+    // 정보 영역
+    var info = document.createElement('div');
+    info.style.cssText = 'padding:16px';
+
+    // 카테고리 배지
+    var badge = document.createElement('span');
+    badge.style.cssText = [
+        'background:#f0f0f0',
+        'color:#666',
+        'font-size:11px',
+        'padding:3px 8px',
+        'border-radius:20px'
+    ].join(';');
+    badge.textContent = poi.category;
+
+    // 장소명
+    var title = document.createElement('h3');
+    title.style.cssText = 'margin:8px 0 4px;font-size:18px;font-weight:700;color:#222';
+    title.textContent = poi.name;
+
+    // 주소
+    var address = document.createElement('p');
+    address.style.cssText = 'margin:0 0 4px;font-size:13px;color:#888';
+    address.textContent = poi.roadAddress || poi.address || '주소 정보 없음';
+
+    // 전화번호
+    var phone = document.createElement('p');
+    phone.style.cssText = 'margin:0 0 12px;font-size:13px;color:#888';
+    phone.textContent = poi.phone ? '📞 ' + poi.phone : '';
+
+    // 버튼 영역
+    var btnArea = document.createElement('div');
+    btnArea.style.cssText = 'display:flex;gap:8px';
+
+    // 카카오맵 바로가기 버튼
+    var kakaoBtn = document.createElement('a');
+    kakaoBtn.href = poi.placeUrl || '#';
+    kakaoBtn.target = '_blank';
+    kakaoBtn.style.cssText = [
+        'flex:1',
+        'padding:10px',
+        'background:#FEE500',
+        'color:#3C1E1E',
+        'border-radius:8px',
+        'text-align:center',
+        'font-size:13px',
+        'font-weight:600',
+        'text-decoration:none'
+    ].join(';');
+    kakaoBtn.textContent = '카카오맵';
+
+    // 커뮤니티 버튼
+    var communityBtn = document.createElement('button');
+    communityBtn.style.cssText = [
+        'flex:1',
+        'padding:10px',
+        'background:#ff6b35',
+        'color:#fff',
+        'border:none',
+        'border-radius:8px',
+        'font-size:13px',
+        'font-weight:600',
+        'cursor:pointer'
+    ].join(';');
+    communityBtn.textContent = '커뮤니티';
+    communityBtn.onclick = function() {
+        // TODO: 커뮤니티 페이지로 이동하는 로직 추가
+        alert(poi.name + ' 커뮤니티로 이동!');
+    };
+
+    // 조립
+    btnArea.appendChild(kakaoBtn);
+    btnArea.appendChild(communityBtn);
+
+    info.appendChild(badge);
+    info.appendChild(title);
+    info.appendChild(address);
+    if (poi.phone) info.appendChild(phone);
+    info.appendChild(btnArea);
+
+    card.appendChild(imgArea);
+    card.appendChild(info);
+    overlayContainer.appendChild(card);
+
+    // 배경 클릭 시 닫기
+    overlayContainer.addEventListener('click', function(e) {
+        if (e.target === overlayContainer) closePoiOverlay();
+    });
+
+    document.body.appendChild(overlayContainer);
 }
 
 /**
