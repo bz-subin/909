@@ -75,6 +75,14 @@ class Like(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     __table_args__ = (UniqueConstraint('user_id', 'feed_id', name='unique_user_feed_like'),)
 
+class Comment(Base):
+    __tablename__ = 'comments'
+    id = Column(BigInteger, primary_key=True, index=True)
+    feed_id = Column(BigInteger, ForeignKey('feeds.id'), nullable=False)
+    user_id = Column(UUID(as_uuid=True), nullable=False)  # FK 제거
+    content = Column(Text, nullable=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
 # ----------------------------------------------------------------------------------------
 
 # DB 테이블 생성
@@ -149,6 +157,15 @@ class FeedUpdate(BaseModel):
     content: str
     image_url: Optional[str] = None
     category_code : Optional[str] = None
+
+# 댓글 작성 요청 데이터
+class CommentInput(BaseModel):
+    feed_id: int
+    user_id: str
+    content: str
+
+class CommentUpdate(BaseModel):
+    content: str
 
 # ----------------------------------------------------------------------------------------
 
@@ -340,6 +357,67 @@ async def delete_feed(feed_id: int, user_id: str, db: Session = Depends(get_db))
     db.commit()
     return {"result": "success"}
 
+# ------------------ 댓글 (Comments) API ------------------
+
+# [API] 댓글 작성
+@app.post("/comments")
+async def create_comment(data: CommentInput, db: Session = Depends(get_db)):
+    new_comment = Comment(
+        feed_id=data.feed_id,
+        user_id=uuid.UUID(data.user_id),
+        content=data.content
+    )
+    db.add(new_comment)
+    db.commit()
+    db.refresh(new_comment)
+    
+    # 작성자 닉네임 조회
+    user = db.query(Profile).filter(Profile.id == new_comment.user_id).first()
+    return {
+        "id": new_comment.id,
+        "content": new_comment.content,
+        "user_id": str(new_comment.user_id),
+        "nickname": user.nickname if user else "Unknown",
+        "created_at": new_comment.created_at
+    }
+
+# [API] 특정 게시글의 댓글 목록 조회
+@app.get("/comments/{feed_id}")
+async def get_comments(feed_id: int, db: Session = Depends(get_db)):
+    # Comment와 Profile을 조인하여 닉네임까지 가져오기
+    results = db.query(Comment, Profile.nickname)\
+        .join(Profile, Comment.user_id == Profile.id)\
+        .filter(Comment.feed_id == feed_id)\
+        .order_by(Comment.created_at.asc())\
+        .all()
+    
+    comments_list = []
+    for comment, nickname in results:
+        comments_list.append({
+            "id": comment.id,
+            "feed_id": comment.feed_id,
+            "user_id": str(comment.user_id),
+            "content": comment.content,
+            "created_at": comment.created_at,
+            "nickname": nickname
+        })
+    return comments_list
+
+# [API] 댓글 삭제
+@app.delete("/comments/{comment_id}")
+async def delete_comment(comment_id: int, user_id: str, db: Session = Depends(get_db)):
+    comment = db.query(Comment).filter(Comment.id == comment_id).first()
+    if not comment:
+        raise HTTPException(status_code=404, detail="댓글을 찾을 수 없습니다.")
+    if str(comment.user_id) != user_id:
+        raise HTTPException(status_code=403, detail="삭제 권한이 없습니다.")
+    
+    db.delete(comment)
+    db.commit()
+    return {"result": "success"}
+
+
+
 
 
 
@@ -368,10 +446,7 @@ async def index_page(request: Request):
 # html을 랜더링하여 응답
 @app.get("/community")
 async def community(request: Request):
-    return templates.TemplateResponse("community.html", {"request": request})
-
-#!--------------------------------------------------------------------------------------------------sb
-
+    return templates.TemplateResponse("community.html")
 
 if __name__ == "__main__":
     import uvicorn
