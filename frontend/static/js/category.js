@@ -387,7 +387,10 @@ function showPoiOverlay(poi) {
         'cursor:pointer'
     ].join(';');
     communityBtn.textContent = '커뮤니티';
-    
+    //*변경 해야함//*변경 해야함//*변경 해야함//*변경 해야함
+    communityBtn.addEventListener('click', () => {
+    window.location.href = 'community.html';
+});
 
     // 조립
     btnArea.appendChild(kakaoBtn);
