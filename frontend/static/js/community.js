@@ -277,6 +277,9 @@ URL(publicUrl) + 다른 입력값(input 등) → DB 저장  */
             } else {
                 btnEdit.classList.add('hidden');
             }
+
+            // 댓글 불러오기 호출
+            fetchComments(feed.id);
         }
 
         // --- [수정] 게시글 수정 모드 진입 및 저장 (PATCH) ---
@@ -349,8 +352,10 @@ URL(publicUrl) + 다른 입력값(input 등) → DB 저장  */
                 if (idx !== -1) all_feed[idx] = updatedFeed;
                 renderFeedList();
                 
-                // 모달 상세 뷰 갱신 후 복귀
+                // 모달 (상세보기) 갱신
                 openDetailModal(updatedFeed);
+                // 수정 모달 닫기
+                document.getElementById('edit-section').classList.add('hidden');
 
             } catch (err) {
                 console.error(err);
@@ -358,40 +363,113 @@ URL(publicUrl) + 다른 입력값(input 등) → DB 저장  */
             }
         });
 
-        // --- [공통] 모달 닫기 ---
-        document.querySelectorAll('.btn-close-modal').forEach(btn => {
-            btn.addEventListener('click', closeModal);
-        });
 
-        function closeModal() {  //모달 닫기
-            write_div_modal.classList.remove('show');
+        // ==========================================
+        // [댓글 System] Logic
+        // ==========================================
+        
+        // 1. 댓글 불러오기
+        async function fetchComments(feedId) {
+            const commentListDiv = document.getElementById('comment-list');
+            commentListDiv.innerHTML = '<p style="color:#94a3b8; font-size:0.875rem;">댓글을 불러오는 중...</p>';
+
+            try {
+                const res = await fetch(`/comments/${feedId}`);
+                if (!res.ok) throw new Error("댓글 조회 실패");
+                const comments = await res.json();
+                renderComments(comments);
+            } catch (err) {
+                console.error(err);
+                commentListDiv.innerHTML = '<p>댓글을 불러오지 못했습니다.</p>';
+            }
         }
 
-        // 모달 외부 클릭 시 닫기
-        window.addEventListener('click', (e) => {
-            if (e.target === write_div_modal) {
-                closeModal();
+        // 2. 댓글 렌더링
+        function renderComments(comments) {
+            const commentListDiv = document.getElementById('comment-list');
+            commentListDiv.innerHTML = '';
+
+            if (comments.length === 0) {
+                commentListDiv.innerHTML = '<p style="color:#94a3b8; font-size:0.875rem;">아직 댓글이 없습니다.</p>';
+                return;
+            }
+
+            comments.forEach(cmt => {
+                const item = document.createElement('div');
+                item.style.cssText = "padding-bottom: 0.75rem; border-bottom: 1px solid #f1f5f9;";
+                
+                // 작성일 포맷
+                const dateStr = new Date(cmt.created_at).toLocaleString('ko-KR', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+
+                // 본인 댓글 확인
+                const isMyComment = String(cmt.user_id) === String(login_user_id);
+                const deleteBtn = isMyComment 
+                    ? `<button onclick="deleteComment(${cmt.id}, ${cmt.feed_id})" style="color: #ef4444; font-size: 0.75rem; background:none; border:none; cursor:pointer; margin-left: auto;">삭제</button>` 
+                    : '';
+
+                item.innerHTML = `
+                    <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.25rem;">
+                        <!-- 임시 아이콘 -->
+                        <div style="width: 24px; height: 24px; background: #e2e8f0; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.75rem;">👤</div>
+                        <span style="font-weight: 600; font-size: 0.875rem;">${cmt.nickname}</span>
+                        <span style="color: #94a3b8; font-size: 0.75rem;">${dateStr}</span>
+                        ${deleteBtn}
+                    </div>
+                    <p style="font-size: 0.9rem; color: #334155; white-space: pre-wrap; padding-left: 2rem;">${cmt.content}</p>
+                `;
+                commentListDiv.appendChild(item);
+            });
+        }
+
+        // 3. 댓글 저장
+        document.getElementById('btn-save-comment').addEventListener('click', async () => {
+            const contentArea = document.getElementById('comment_input');
+            const content = contentArea.value.trim();
+
+            if (!content) return alert("댓글 내용을 입력해주세요.");
+            if (!login_user_id) return alert("로그인이 필요합니다.");
+
+            if (!selected_feed) return;
+
+            try {
+                const res = await fetch('/comments', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        feed_id: selected_feed.id,
+                        user_id: login_user_id,
+                        content: content
+                    })
+                });
+
+                if (!res.ok) throw new Error("댓글 저장 실패");
+                
+                // 성공 시 입력창 비우고 목록 다시 불러오기
+                contentArea.value = '';
+                fetchComments(selected_feed.id);
+
+            } catch (err) {
+                console.error(err);
+                alert("오류: " + err.message);
             }
         });
 
+        // 4. 댓글 삭제 (window 객체에 할당하여 HTML onclick에서 접근 가능하게 함)
+        window.deleteComment = async function(commentId, feedId) {
+            if (!confirm("댓글을 삭제하시겠습니까?")) return;
 
-        
-        // --- 삭제 ---
-        window.deleteFeed = async function(feedId) {
-            if (!confirm("삭제하시겠습니까?")) return;
             try {
-                const res = await fetch(`/feed/${feedId}?user_id=${login_user_id}`, { method: 'DELETE' });
+                // user_id는 쿼리 파라미터로 전달 (보안상 좋진 않지만 현재 구조 유지)
+                const res = await fetch(`/comments/${commentId}?user_id=${login_user_id}`, {
+                    method: 'DELETE'
+                });
                 if (res.ok) {
-                    all_feed = all_feed.filter(f => f.id !== feedId);
-                    renderFeedList();
-                    alert("삭제되었습니다.");
+                    fetchComments(feedId);
                 } else {
-                    const data = await res.json();
-                    alert("삭제 실패: " + (data.detail || "권한이 없습니다."));
+                    alert("삭제 실패");
                 }
             } catch (err) {
                 console.error(err);
-                alert("삭제 중 오류가 발생했습니다.");
+                alert("오류 발생");
             }
         }
-
