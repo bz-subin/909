@@ -259,7 +259,6 @@ input, button {
   width: 3.5rem;
   height: 3.5rem;
   border-radius: 50%;
-  background: var(--primary);
   display: flex;
   align-items: center;
   justify-content: center;

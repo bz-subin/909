@@ -90,8 +90,8 @@
             </div>
 
             <div class="stats-section">
-                <div class="avatar" style="width: 2.5rem; height: 2.5rem">
-                    <img src="/static/image/cha.jpg" alt="Penguin Mascot">
+                <div class="avatar" style="width: 2.5rem; height: 2.5rem; font-size: 2rem; display: flex; align-items: center; justify-content: center;">
+                    <span class="weather-emoji">⏳</span>
                 </div>
                 <div>
                     <p class="weather-title" style="font-size: 0.875rem; font-weight: 500;">날씨 로딩 중...</p>
@@ -148,6 +148,8 @@
     <script src="/static/js/map.js"></script>
     <script src="/static/js/category.js"></script>
     <script src="/static/js/navigation.js"></script>
+    <script src="/static/js/auth.js"></script>
+    <script src="/static/js/weather.js"></script>
     <script>
         // Kakao Map 연결 함수를 직접 호출하여 초기화 과정을 시작합니다.
         // 이 함수 내에서 Kakao Maps API 및 필요한 서비스(`services`)가 로드된 후,
@@ -298,8 +300,7 @@
         window.SUPABASE_URL = "{{ supabase_url }}";
         window.SUPABASE_KEY = "{{ supabase_key }}";
     </script>
-    <script src="/static/js/auth.js"></script>
-    <script src="/static/js/weather.js"></script>
+    
 </body>
 </html>
 

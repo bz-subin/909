@@ -5,6 +5,7 @@ async function updateWeatherUI() {
     // 1. [DOM 요소 사전 확보] 날씨 정보를 표시할 HTML 요소를 미리 선택합니다.
     const titleP = document.querySelector('.weather-title');
     const descP = document.querySelector('.weather-desc');
+    const emojiSpan = document.querySelector('.weather-emoji');
 
     console.log("❄️ PenPing 날씨 시스템: 데이터 로드를 시작합니다.");
 
@@ -45,6 +46,7 @@ async function updateWeatherUI() {
             const theme = getWeatherTheme(tmp, sky, pty);
 
             titleP.innerHTML = `현재 ${tmp}°C ${theme.emoji}`;
+            emojiSpan.innerHTML = theme.emoji;
             descP.innerHTML = `${theme.message}<br>대전으로 탐험하러 갈까요? 👍`;
             console.log("✅ PenPing 날씨 시스템: 업데이트 성공!");
         }
