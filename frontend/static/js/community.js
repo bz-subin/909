@@ -66,6 +66,7 @@ URL(publicUrl) + 다른 입력값(input 등) → DB 저장  */
         let selected_feed = null;
         let login_user_id = null;
         let is_loading = false;
+        let currentPlaceName = null; // 현재 선택된 플레이스 (없으면 null = 전체보기)
 
         const feed_div = document.getElementById('feed-div'); //피드 추가할 영역
         const write_div_modal = document.getElementById('write-div-modal'); //
@@ -87,17 +88,41 @@ URL(publicUrl) + 다른 입력값(input 등) → DB 저장  */
             login_user_id = user.id;
             console.log("Logged in user:", login_user_id);
 
+            // [수정] localStorage에서 place_name 읽기
+            const storedPlaceName = localStorage.getItem('place_name');
+
+            if (storedPlaceName) {
+                currentPlaceName = storedPlaceName;
+                updateHeaderUI(true); // 플레이스 모드 UI
+            } else {
+                updateHeaderUI(false); // 전체 모드 UI
+            }
+
+
             await fetchAllFeeds();
+            fetchPopularPlaces(); // 인기 장소 불러오기
+            console.log(all_feed);
         });
 
+        // 헤더 UI 업데이트 함수
+        function updateHeaderUI(isPlaceMode) {
+            const titleEl = document.getElementById('header-title');
+            if (isPlaceMode) {
+                titleEl.innerText = currentPlaceName;
+            } else {
+                titleEl.innerText = '전체 커뮤니티';
+            }
+        }
 
         //* GET [/get-data]
         // 서버에서 전체 게시글(피드) 싹 다 불러오기
         async function fetchAllFeeds() {
             try {
+                // [수정] user_id 포함하여 좋아요 여부 확인
                 const res = await fetch(`/get_data?user_id=${login_user_id || ''}`);
                 all_feed = await res.json(); 
                 renderFeedList();
+                console.log(currentPlaceName);
             } catch (err) {
                 console.error(err);
                 feed_div.innerHTML = "피드를 불러오는데 실패했습니다.";
@@ -107,13 +132,25 @@ URL(publicUrl) + 다른 입력값(input 등) → DB 저장  */
         // 불러온 데이터로 화면 그리기(피드)
         function renderFeedList() {
             feed_div.innerHTML = '';
-            if (all_feed.length === 0) {  //가져온 피드가 없다면
+            // [추가] 필터링 로직
+            let filteredFeeds = all_feed;
+            
+            if (currentPlaceName) {
+                console.log('currentPlaceName:', currentPlaceName);
+                console.log(all_feed.map(f => f.place_name));
+
+                // 플레이스 모드: 해당 장소 피드만 필터링
+                filteredFeeds = all_feed.filter(feed => feed.place_name === currentPlaceName);
+            } 
+            // 전체 모드일 때 특별히 제외할 조건이 없다면 전체 표시 (또는 place_name 없는 것만 표시하려면 조건 추가)
+
+            if (filteredFeeds.length === 0) {
                 feed_div.innerHTML = '<p style="text-align:center; padding: 2rem; color: #64748b;">게시글이 없습니다.</p>';
                 return;
             }
 
-            // 피드 최신순 정렬 (ID 기준 역순 가정)
-            const sortedFeeds = [...all_feed].sort((a, b) => b.id - a.id);
+
+            const sortedFeeds = [...filteredFeeds].sort((a, b) => b.id - a.id);
             sortedFeeds.forEach(feed => {
                 const feedCard = each_feed(feed);
                 feed_div.appendChild(feedCard);
@@ -213,8 +250,8 @@ URL(publicUrl) + 다른 입력값(input 등) → DB 저장  */
         }); 
         // 저장 버튼 클릭
         const btn_write_save = document.getElementById('btn-write-save')
+        btn_write_save.addEventListener('click', async () => {
             console.log("저장 버튼 클릭됨!")
-            btn_write_save.addEventListener('click', async () => {
             const title = document.getElementById('input_title').value;
             const content = document.getElementById('input_content').value;
             const fileInput = document.getElementById('input-file');
@@ -248,10 +285,10 @@ URL(publicUrl) + 다른 입력값(input 등) → DB 저장  */
                         content: content,
                         user_id: login_user_id,
                         image_url: publicUrl, //아까 만든 url 넣음
-                        category_code: document.getElementById('category-filter')?.value || null
-                    })
+                        category_code: document.getElementById('category-filter')?.value || null,
+                        place_name: currentPlaceName // [추가] 현재 플레이스 이름 저장 (없으면 null)
+                    })  
                 });
-
                 if(!res.ok) throw new Error("저장 실패"); //응답 상태가 200이 아니면 저장실패
                 const newFeed = await res.json(); // 저장 했으면 newFeed에 넣어라
 
@@ -478,7 +515,9 @@ URL(publicUrl) + 다른 입력값(input 등) → DB 저장  */
         // 4. 댓글 삭제 (window 객체에 할당하여 HTML onclick에서 접근 가능하게 함)
         window.deleteComment = async function(commentId, feedId) {
             if (!confirm("댓글을 삭제하시겠습니까?")) return;
+
             try {
+                // user_id는 쿼리 파라미터로 전달 (보안상 좋진 않지만 현재 구조 유지)
                 const res = await fetch(`/comments/${commentId}?user_id=${login_user_id}`, {
                     method: 'DELETE'
                 });
@@ -490,6 +529,49 @@ URL(publicUrl) + 다른 입력값(input 등) → DB 저장  */
             } catch (err) {
                 console.error(err);
                 alert("오류 발생");
+            }
+        }
+
+        // [추가] 인기 장소 불러오기 (Right Sidebar)
+        async function fetchPopularPlaces() {
+            const widget = document.querySelector('.right-sidebar .widget');
+            if (!widget) return;
+
+            // 기존 하드코딩된 목록 제거 (제목 제외)
+            const existingItems = widget.querySelectorAll('.popular-place');
+            existingItems.forEach(el => el.remove());
+
+            try {
+                const res = await fetch('/popular-places');
+                if (!res.ok) throw new Error('인기 장소 조회 실패');
+                
+                const places = await res.json();
+
+                // 데이터가 없을 경우 처리
+                if (places.length === 0) {
+                    const emptyDiv = document.createElement('div');
+                    emptyDiv.className = 'popular-place';
+                    emptyDiv.style.justifyContent = 'center';
+                    emptyDiv.innerHTML = '<p style="font-size: 0.875rem; color: var(--text-muted);">인기 장소가 없습니다.</p>';
+                    widget.appendChild(emptyDiv);
+                    return;
+                }
+
+                // 데이터 렌더링
+                places.forEach(place => {
+                    const div = document.createElement('div');
+                    div.className = 'popular-place';
+                    div.innerHTML = `
+                        <div class="rank">${place.rank}</div>
+                        <div>
+                            <h4 style="font-size: 0.875rem;">${place.place_name}</h4>
+                            <p style="font-size: 0.75rem; color: var(--text-muted);">좋아요 ${place.like_count}개</p>
+                        </div>
+                    `;
+                    widget.appendChild(div);
+                });
+            } catch (err) {
+                console.error(err);
             }
         }
 
@@ -533,7 +615,22 @@ URL(publicUrl) + 다른 입력값(input 등) → DB 저장  */
             document.getElementById('edit-section').classList.add('hidden');
         }
 
-        // 기존 닫기 버튼 이벤트 리스너가 closeModal 함수를 호출하도록 보장
+        // 닫기 버튼 클릭 시 모달 닫기
+        const btn_close_modal = document.querySelectorAll('.btn-close-modal');
+        btn_close_modal.forEach(btn => {
+            btn.onclick = closeModal;
+        });
+
+        // 모달 밖 클릭 시 닫기
+        document.addEventListener('click', function(e) {
+            const viewSection = document.getElementById('view-section');
+            const writeSection = document.getElementById('write-section');
+            if (e.target === viewSection) closeModal();
+            if (e.target === writeSection) closeModal();
+        }); 
+
+
+                // 기존 닫기 버튼 이벤트 리스너가 closeModal 함수를 호출하도록 보장
         document.querySelectorAll('.btn-close-modal').forEach(btn => {
             btn.onclick = closeModal;
         });

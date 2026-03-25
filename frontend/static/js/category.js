@@ -403,9 +403,10 @@ function showPoiOverlay(poi) {
         'cursor:pointer'
     ].join(';');
     communityBtn.textContent = '커뮤니티';
-    //*변경 해야함//*변경 해야함//*변경 해야함//*변경 해야함
+    
     communityBtn.addEventListener('click', () => {
-    window.location.href = 'community.html';
+        localStorage.setItem('place_name', poi.name);
+        window.location.href = '/community';
 });
 
     // 조립

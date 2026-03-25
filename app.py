@@ -18,6 +18,7 @@ from fastapi.responses import JSONResponse, HTMLResponse, RedirectResponse  # �
 from fastapi.templating import Jinja2Templates
 from typing import Optional 
 from datetime import datetime, timedelta
+from sqlalchemy import desc
 # -----------------------------------------------------------------------------------
 
 # .env 로드 및 설정
@@ -368,7 +369,9 @@ async def user_input(data: UserInput, db: Session = Depends(get_db)):
         "title": new_feed.title,
         "content": new_feed.content,
         "image_url": new_feed.image_url,
-        "category_code": new_feed.category_code
+        "category_code": new_feed.category_code,
+        "place_name": new_feed.place_name,  # ← 추가
+        "created_at": new_feed.created_at,
     }
 
 #* DB_수정 [API] 게시글 수정 (Update)
@@ -429,6 +432,7 @@ async def get_data(user_id: Optional[str] = None, db: Session = Depends(get_db))
             "content": feed.content,
             "image_url": feed.image_url,
             "category_code": feed.category_code,
+            "place_name": feed.place_name,  # ← 이거 추가
             "created_at": feed.created_at,
             "comment_count": comment_count,
             "like_count": like_count,
@@ -479,6 +483,34 @@ async def remove_like(feed_id: int, user_id: str, db: Session = Depends(get_db))
     db.delete(like)
     db.commit()
     return {"result": "success"}
+
+
+
+
+
+# [API] 인기 장소 조회 (좋아요 많은 순)
+@app.get("/popular-places")
+async def get_popular_places(db: Session = Depends(get_db)):
+    # 1. Feeds와 Likes 조인
+    # 2. place_name이 있는(null이 아닌) 피드만 필터링
+    # 3. feed_id 기준 좋아요 수 집계 (내림차순 정렬)
+    results = db.query(Feed.place_name, func.count(Like.id).label('like_count'))\
+        .join(Like, Feed.id == Like.feed_id)\
+        .filter(Feed.place_name.isnot(None))\
+        .group_by(Feed.id)\
+        .order_by(desc('like_count'), Feed.created_at.asc())\
+        .limit(5)\
+        .all()
+    
+    response = []
+    for idx, row in enumerate(results):
+        response.append({
+            "rank": f"{idx + 1:02d}",
+            "place_name": row.place_name,
+            "like_count": row.like_count
+        })
+    return response
+
 # ------------------ 댓글 (Comments) API ------------------
 
 # [API] 댓글 작성
