@@ -36,7 +36,8 @@ function initPlacesService() {
  * 2. 지도 위 마커 제거
  * 새로운 검색을 수행하거나 카테고리를 바꿀 때 기존 마커를 지도에서 지우고 배열을 비웁니다.
  */
-function clearPoiMarkers() {
+function 
+clearPoiMarkers() {
     poiMarkersArray.forEach(function(marker) { 
         marker.setMap(null); // 지도에서 제거
     });
@@ -245,21 +246,34 @@ function pathShop(poiList) {
         var position = new kakao.maps.LatLng(poi.lat, poi.lng);
         
         // 마커 객체 생성
-        var marker = new kakao.maps.Marker({
+        var content = document.createElement('div');
+        content.innerHTML = '🧊';
+        content.style.cssText = [
+            'font-size: 50px',
+            'cursor: pointer',
+            'filter: drop-shadow(2px 2px 2px rgba(0,0,0,0.3))'
+        ].join(';');
+
+        // 2. 이모지 클릭 이벤트 리스너 추가
+        content.onclick = function() {
+            showPoiOverlay(poi);      // 기존 정보창 띄우기
+            updateCommunityLink(poi); // 커뮤니티 버튼에 ID 연결
+        };
+
+        // 3. 커스텀 오버레이로 지도에 표시
+        var customOverlay = new kakao.maps.CustomOverlay({
             map: window.kakaoMap,
             position: position,
-            title: poi.name,
+            content: content,
+            xAnchor: 0.5,
+            yAnchor: 0.5
         });
 
-        // 마커 클릭 시 오버레이 표시 이벤트
-        kakao.maps.event.addListener(marker, 'click', function() {
-            showPoiOverlay(poi);
-        });
-
-        poiMarkersArray.push(marker);
+        // 기존 마커 관리 배열에 저장 (삭제 로직 호환을 위해)
+        poiMarkersArray.push(customOverlay);
     });
 
-    console.log("마커 " + poiMarkersArray.length + "개 지도에 표시");
+    console.log("얼음 핀 " + poiMarkersArray.length + "개 지도에 표시");
 }
 
 /**
