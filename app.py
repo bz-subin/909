@@ -266,6 +266,8 @@ async def community_page(request: Request, place_name: str, category: Optional[s
 # "category": category  (삭제 하려다가 둠)
 
 
+import uuid
+
 #* DB_생성[API] 게시글 작성 (Create)
 @app.post("/user_input")
 async def user_input(data: UserInput, db: Session = Depends(get_db)):
@@ -274,7 +276,7 @@ async def user_input(data: UserInput, db: Session = Depends(get_db)):
     new_feed = Feed(          # Feed 모델에 값 담기
         title=data.title,
         content=data.content,
-        user_id=data.user_id,
+        user_id=uuid.UUID(data.user_id),
         image_url=data.image_url,
         category_code=data.category_code
     )
@@ -325,10 +327,15 @@ async def get_data(db: Session = Depends(get_db)):
 
 #* DB_삭제 버튼
 @app.delete("/feed/{feed_id}")
-async def delete_feed(feed_id: int, db: Session = Depends(get_db)):
+async def delete_feed(feed_id: int, user_id: str, db: Session = Depends(get_db)):
     feed = db.query(Feed).filter(Feed.id == feed_id).first()
     if not feed:
         raise HTTPException(status_code=404, detail="게시글을 찾을 수 없습니다.")
+    
+    # 본인 확인 로직 추가 (UUID 문자열 비교)
+    if str(feed.user_id) != user_id:
+        raise HTTPException(status_code=403, detail="삭제 권한이 없습니다.")
+
     db.delete(feed)
     db.commit()
     return {"result": "success"}

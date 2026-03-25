@@ -42,7 +42,9 @@ const supabase = window.supabase.createClient(  // ← 이걸로 교체
 
             // 사진 미리보기
             const preview_img = document.querySelector('#preview-img');
-            preview_img.src = publicUrl; // preview-img 영역 src(주소)부분에 url을 넣겠다 (= 이미지 띄우겠다)
+            if (preview_img) {
+                preview_img.innerHTML = `<img src="${publicUrl}" style="width: 100px; height: 100px; object-fit: cover; border-radius: 8px; margin-top: 10px;">`;
+            }
         });
 
 
@@ -72,8 +74,8 @@ URL(publicUrl) + 다른 입력값(input 등) → DB 저장  */
 // -> 사용 여부 확인 필요
 //         --- [초기화] DOM 로드 시 로그인 체크 및 데이터 로딩 ---
         window.addEventListener('DOMContentLoaded', async () => {
-// localStorage 대신 supabase에게 직접 물어봅니다.
-        const { data: { user } } = await supabase.auth.getUser();
+            // localStorage 대신 supabase에게 직접 물어봅니다.
+            const { data: { user } } = await supabase.auth.getUser();
 
             if (!user) {
                 alert("로그인이 필요합니다."); 
@@ -87,11 +89,6 @@ URL(publicUrl) + 다른 입력값(input 등) → DB 저장  */
 
             await fetchAllFeeds();
         });
-
-// 위에 DOMContentLoaded 살리면 이 부분 지우기
-window.addEventListener('DOMContentLoaded', async () => {
-    await fetchAllFeeds();  
-});
 
 
         //* GET [/get-data]
@@ -111,7 +108,7 @@ window.addEventListener('DOMContentLoaded', async () => {
         function renderFeedList() {
             feed_div.innerHTML = '';
             if (all_feed.length === 0) {  //가져온 피드가 없다면
-                feed_div.innerHTML = '<p>게시글이 없습니다.</p>';
+                feed_div.innerHTML = '<p style="text-align:center; padding: 2rem; color: #64748b;">게시글이 없습니다.</p>';
                 return;
             }
 
@@ -129,29 +126,46 @@ window.addEventListener('DOMContentLoaded', async () => {
             div.className = 'post-card'; //클래스명 (유니폼)
             div.id = `feed-${feed.id}`; //아이디
             
-            // 내용 앞 20자만 띄움 (substring)
-            const shortContent = feed.content.length > 20 ? feed.content.substring(0, 20) + '...' : feed.content;
+            // 내용 앞 100자 정도로 확장 (한 줄 배치이므로 더 많이 보여줌)
+            const shortContent = feed.content.length > 100 ? feed.content.substring(0, 100) + '...' : feed.content;
 
-            // 이미지가 있으면 이미지도 추가
+            // 이미지가 있으면 이미지 영역 생성, 없으면 아예 생성 안 함
             let imgTag = '';
             if (feed.image_url) {
-                imgTag = `<img src="${feed.image_url}" alt="image">`;
+                imgTag = `
+                    <div class="post-img-container">
+                        <img src="${feed.image_url}" alt="image" class="post-thumb">
+                    </div>
+                `;
             }
 
 
-            // 삭제 버튼 클릭시
+            // 삭제 버튼 (제목 옆 배치를 위해 클래스 유지)
             const deleteBtn = String(feed.user_id) === String(login_user_id) 
-                ? `<button onclick="event.stopPropagation(); deleteFeed(${feed.id})">삭제</button>` 
+                ? `<button class="btn-delete-feed" onclick="event.stopPropagation(); deleteFeed(${feed.id})">
+                    <svg width="18" height="18" fill="currentColor" viewBox="0 0 16 16">
+                        <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"/>
+                        <path fill-rule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z"/>
+                    </svg>
+                   </button>` 
                 : '';
 
 
             div.innerHTML = `
-                <h3>${feed.title}</h3>
-                <p>${shortContent}</p>
-                ${feed.category_code ? `<span>${feed.category_code}</span>` : ''}
                 ${imgTag}
-                ${deleteBtn}
-                
+                <div class="post-content">
+                    <div class="post-header">
+                        <h3 class="post-title">${feed.title}</h3>
+                        ${deleteBtn}
+                    </div>
+                    <p class="post-text">${shortContent}</p>
+                    <div class="post-footer">
+                        <div class="post-meta-left">
+                            ${feed.category_code ? `<span class="badge">${feed.category_code}</span>` : ''}
+                            <span class="post-date">${new Date(feed.created_at || Date.now()).toLocaleDateString()}</span>
+                        </div>
+                    </div>
+                </div>
             `;
 
             // 카드 클릭 시 상세 모달 열기 이벤트 연결
@@ -173,6 +187,8 @@ window.addEventListener('DOMContentLoaded', async () => {
             document.getElementById('input_title').value = '';  // 제목
             document.getElementById('input_content').value = '';  // 내용
             document.getElementById('input-file').value = '';  // 이미지
+            const preview_img = document.getElementById('preview-img');
+            if (preview_img) preview_img.innerHTML = '';
         }); 
         // 저장 버튼 클릭
         const btn_write_save = document.getElementById('btn-write-save')
@@ -211,7 +227,7 @@ window.addEventListener('DOMContentLoaded', async () => {
                         content: content,
                         user_id: login_user_id,
                         image_url: publicUrl, //아까 만든 url 넣음
-                        category_code: null
+                        category_code: document.getElementById('category-filter')?.value || null
                     })
                 });
 
@@ -219,9 +235,8 @@ window.addEventListener('DOMContentLoaded', async () => {
                 const newFeed = await res.json(); // 저장 했으면 newFeed에 넣어라
 
                 // 3. 화면 즉시 갱신 (서버 재요청 없이 리스트 맨 앞에 추가)
-                all_feed.push(newFeed);
-                const newCard = each_feed(newFeed);
-                feed_div.prepend(newCard); // 맨 앞에 추가
+                all_feed.unshift(newFeed);
+                renderFeedList(); // 전체 다시 그려 정렬 유지
                 
                 closeModal();
 
@@ -250,21 +265,12 @@ window.addEventListener('DOMContentLoaded', async () => {
             
             // 사진 띄워주는
             const imgArea = document.getElementById('view_img_area');
-            imgArea.innerHTML = feed.image_url ? `<img src="${feed.image_url}" style="max-width:100%; border-radius:8px;">` : '';
-
-``
-
-            ///로그인 시 들어올 login_user_id 부분 테스트용(삭제 예정)
-            window.addEventListener('DOMContentLoaded', async () => {
-                login_user_id = "5c3d7540-3dc7-4e3a-a8c9-4dc82d13b2b6"; // 임시
-                await fetchAllFeeds();
-            });
+            imgArea.innerHTML = feed.image_url ? `<img src="${feed.image_url}" style="width:100%; aspect-ratio:1/1; object-fit:cover; border-radius:12px;">` : '';
 
 
             // 작성자 본인 확인 (로그인된 ID와 게시글 작성자 ID 비교) - 수정 버튼
             const btnEdit = document.getElementById('btn-to-edit');
-            console.log(feed.user_id)
-            console.log(login_user_id)
+            
             // user_id 비교 (문자열 변환하여 비교)
             if (String(feed.user_id) === String(login_user_id)) {
                 btnEdit.classList.remove('hidden');
@@ -338,12 +344,10 @@ window.addEventListener('DOMContentLoaded', async () => {
                 // 3. 클라이언트 데이터 및 UI 즉시 갱신
                 selected_feed = updatedFeed; // 현재 선택된 피드 갱신
                 
-                // 목록(feed_div) 내 해당 카드 갱신
-                const oldCard = document.getElementById(`feed-${updatedFeed.id}`);
-                if (oldCard) {
-                    const newCard = each_feed(updatedFeed);
-                    feed_div.replaceChild(newCard, oldCard);
-                }
+                // 리스트 갱신을 위해 데이터 업데이트 후 다시 렌더링
+                const idx = all_feed.findIndex(f => f.id === updatedFeed.id);
+                if (idx !== -1) all_feed[idx] = updatedFeed;
+                renderFeedList();
                 
                 // 모달 상세 뷰 갱신 후 복귀
                 openDetailModal(updatedFeed);
@@ -373,13 +377,21 @@ window.addEventListener('DOMContentLoaded', async () => {
 
         
         // --- 삭제 ---
-        async function deleteFeed(feedId) {
+        window.deleteFeed = async function(feedId) {
             if (!confirm("삭제하시겠습니까?")) return;
-            const res = await fetch(`/feed/${feedId}`, { method: 'DELETE' });
-            if (res.ok) {
-                document.getElementById(`feed-${feedId}`).remove();
-            } else {
-                alert("삭제 실패");
+            try {
+                const res = await fetch(`/feed/${feedId}?user_id=${login_user_id}`, { method: 'DELETE' });
+                if (res.ok) {
+                    all_feed = all_feed.filter(f => f.id !== feedId);
+                    renderFeedList();
+                    alert("삭제되었습니다.");
+                } else {
+                    const data = await res.json();
+                    alert("삭제 실패: " + (data.detail || "권한이 없습니다."));
+                }
+            } catch (err) {
+                console.error(err);
+                alert("삭제 중 오류가 발생했습니다.");
             }
         }
 

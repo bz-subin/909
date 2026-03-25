@@ -1,21 +1,187 @@
 
-/* 모달 및 추가 스타일 */
+/* 전역 변수 */
+:root {
+    --primary: #22d3ee;
+    --primary-hover: #06b6d4;
+    --text-main: #1e293b;
+    --text-muted: #64748b;
+    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+}
+
+/* 1. 한 줄에 하나씩 배치하도록 레이아웃 수정 */
+.feed-divs {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    padding-top: 1rem;
+    width: 100%;
+}
+
+/* 2. 피드 카드 디자인 (더 컴팩트하게 수정) */
+.post-card {
+    background: white;
+    border-radius: 1rem;
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+    transition: all 0.3s ease;
+    border: 1px solid #f1f5f9;
+    display: flex;
+    flex-direction: row; /* 가로 배치로 변경 */
+    cursor: pointer;
+    min-height: 150px;
+    width: 100%;
+}
+
+.post-card:hover {
+    transform: translateX(5px); /* 옆으로 살짝 밀리는 효과 */
+    box-shadow: var(--shadow-md);
+    border-color: var(--primary);
+}
+
+/* 3. 사진 컨테이너 최적화 (사진이 있을 때만 딱 맞게) */
+.post-img-container {
+    width: 180px; /* 고정 너비 */
+    height: 180px; /* 고정 높이 */
+    flex-shrink: 0;
+    overflow: hidden;
+    background-color: #f8fafc;
+}
+
+.post-thumb {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.5s ease;
+}
+
+/* 콘텐츠 영역 */
+.post-content {
+    padding: 1.5rem;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-width: 0; /* 텍스트 넘침 방지 */
+}
+
+.post-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center; /* 세로 중앙 정렬 */
+    margin-bottom: 0.75rem;
+    gap: 1rem;
+}
+
+.post-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--text-main);
+    margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    flex-grow: 1;
+}
+
+.post-text {
+    font-size: 0.95rem;
+    color: #475569;
+    margin-bottom: 1rem;
+    line-height: 1.6;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+/* 4. 삭제 버튼 디자인 (제목 옆으로 이동 및 고정 크기) */
+.btn-delete-feed {
+    flex-shrink: 0;
+    width: 34px;
+    height: 34px;
+    background: #fff1f2;
+    border: none;
+    border-radius: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #ef4444;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-delete-feed:hover {
+    background: #ef4444;
+    color: white;
+}
+
+/* 푸터 및 메타 정보 */
+.post-footer {
+    margin-top: auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 0.75rem;
+}
+
+.post-meta-left {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.badge {
+    padding: 0.25rem 0.75rem;
+    background: rgba(34, 211, 238, 0.1);
+    color: #0891b2;
+    border-radius: 0.5rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.post-date {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+
+/* 모달 스타일 유지 및 소폭 개선 */
 .modal-overlay {
     position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-    background: rgba(0, 0, 0, 0.5); display: none;
+    background: rgba(15, 23, 42, 0.7); display: none;
     justify-content: center; align-items: center; z-index: 1000;
+    backdrop-filter: blur(8px);
 }
 .modal-overlay.show { display: flex; }
-.modal-box {
-    background: white; padding: 2rem; border-radius: 1rem;
-    width: 90%; max-width: 500px; max-height: 90vh; overflow-y: auto;
-}
-.hidden { display: none !important; }
-.post-card { cursor: pointer; border: 1px solid #e2e8f0; padding: 1.5rem; margin-bottom: 1rem; border-radius: 0.5rem; background: #fff; }
-.post-card img { max-width: 100%; height: auto; margin-top: 10px; border-radius: 8px; }
 
-/* 폼 스타일 */
-.input-group { margin-bottom: 1rem; }
+.modal-box {
+    background: white; padding: 2.5rem; border-radius: 1.5rem;
+    width: 95%; max-width: 600px; max-height: 90vh; overflow-y: auto;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+}
+
+.input-group { margin-bottom: 1.5rem; }
+.input-group label {
+    display: block; font-size: 0.9rem; font-weight: 600; margin-bottom: 0.5rem; color: var(--text-main);
+}
 .input-group input[type="text"], .input-group textarea {
-    width: 100%; padding: 0.75rem; border: 1px solid #cbd5e1; border-radius: 0.5rem;
+    width: 100%; padding: 1rem; border: 1px solid #e2e8f0; border-radius: 0.75rem; font-size: 1rem;
+}
+.input-group input:focus, .input-group textarea:focus {
+    outline: none; border-color: var(--primary); box-shadow: 0 0 0 4px rgba(34, 211, 238, 0.1);
+}
+
+.btn-group { display: flex; gap: 1rem; margin-top: 2rem; }
+.btn { padding: 0.875rem 1.5rem; border-radius: 0.75rem; font-weight: 600; cursor: pointer; border: none; flex: 1; transition: all 0.2s; }
+.btn-primary { background: var(--primary); color: white; }
+.btn-primary:hover { background: var(--primary-hover); transform: translateY(-2px); }
+.btn-secondary { background: #f1f5f9; color: #475569; }
+.btn-secondary:hover { background: #e2e8f0; }
+
+.hidden { display: none !important; }
+
+/* 모바일 대응 */
+@media (max-width: 640px) {
+    .post-card { flex-direction: column; }
+    .post-img-container { width: 100%; height: 200px; }
 }
