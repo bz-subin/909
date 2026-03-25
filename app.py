@@ -202,7 +202,7 @@ async def signup(request: Request):
 
 
 @app.get("/map", response_class=HTMLResponse)
-async def map_page(request: Request):
+async def map_page(request: Request, user_data: dict = Depends(require_login)):
     return templates.TemplateResponse("index.html", {
         "request": request,
         "kakao_key": os.getenv("KAKAO_RESTAPI"),  #이 부분 추가 
@@ -331,16 +331,25 @@ async def get_weather():
         return {"error": str(e)}
 
 
-#!--------------------------------------------------------------------------------------------------sb
-
 # /community 특정 장소의 커뮤니티 화면 렌더링
 @app.get("/community/{place_name}", response_class=HTMLResponse)
-async def community_page(request: Request, place_name: str, category: Optional[str] = None):
-    return templates.TemplateResponse("community.html", { #지금 이 주소에서 이 community.html 화면을 보여줄게
+async def community_page_with_place(request: Request, place_name: str, category: Optional[str] = None):
+    return templates.TemplateResponse("community.html", {
         "request": request, 
         "place_name": place_name,
+        "supabase_url": os.getenv("SUPABASE_URL"),
+        "supabase_key": os.getenv("SUPABASE_ANON_KEY")
     })
-# "category": category  (삭제 하려다가 둠)
+
+# /community 기본 커뮤니티 화면 렌더링
+@app.get("/community", response_class=HTMLResponse)
+async def community_page_default(request: Request):
+    return templates.TemplateResponse("community.html", {
+        "request": request,
+        "place_name": "전체 커뮤니티",
+        "supabase_url": os.getenv("SUPABASE_URL"),
+        "supabase_key": os.getenv("SUPABASE_ANON_KEY")
+    })
 
 
 import uuid
@@ -540,33 +549,6 @@ async def delete_comment(comment_id: int, user_id: str, db: Session = Depends(ge
 
 
 
-
-# 스토리지 키 js로 보내는 용도
-@app.get("/community")
-async def community_page(request: Request):
-    # .env에서 가져오기
-    return templates.TemplateResponse("community.html", {
-        "request": request,
-        "supabase_url": os.getenv("SUPABASE_URL"),
-        "supabase_key": os.getenv("SUPABASE_ANON_KEY")
-    })
-
-
-# restapi 키 Index로 보냄(js에서 쓸 수 있게)
-@app.get("/index.html")  # 보통 메인 페이지는 주소를 / 로 씁니다.
-async def index_page(request: Request):
-    # index.html에서도 Supabase를 써야 한다면 키값을 똑같이 넘겨줍니다.
-    return templates.TemplateResponse("index.html", {
-        "request": request,
-        "kakao_key": os.getenv("KAKAO_RESTAPI")
-    })
-
-
-# 카테고리 js에서 보낸 요청 받기(라우터)
-# html을 랜더링하여 응답
-@app.get("/community")
-async def community(request: Request):
-    return templates.TemplateResponse("community.html")
 
 if __name__ == "__main__":
     import uvicorn

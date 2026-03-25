@@ -92,12 +92,14 @@ async function loginWithGoogle() {
 window.addEventListener('DOMContentLoaded', async () => {
     console.log('🔍 페이지 로드 - 세션 확인 시작');
     
-    
     // 현재 세션 확인
     const { data: { session }, error } = await supabaseClient.auth.getSession();
     
     console.log('🔍 세션 확인 결과:', session);
-    console.log('🔍 에러:', error);
+    if (error) console.log('🔍 에러:', error);
+    
+    const path = window.location.pathname;
+    const isPublicPath = path === '/' || path === '/signup' || path === '/login.html'; // login.html 추가 (필요시)
     
     if (session) {
         console.log('✅ 로그인되어 있음!');
@@ -108,13 +110,18 @@ window.addEventListener('DOMContentLoaded', async () => {
         
         console.log('✅ 쿠키 저장 완료');
         
-        // 현재 페이지가 로그인 페이지면 /map으로 이동
-        if (window.location.pathname === '/' || window.location.pathname === '/signup') {
+        // 현재 페이지가 로그인 페이지거나 가입 페이지면 /map으로 이동
+        if (isPublicPath) {
             console.log('🚀 /map으로 리다이렉트');
             window.location.href = '/map';
         }
     } else {
         console.log('❌ 세션 없음 - 로그인 필요');
+        // 세션이 없는데 보호된 페이지(/map, /community 등)에 있으면 로그인 페이지(/)로 이동
+        if (!isPublicPath) {
+            console.log('🚀 로그인 페이지로 리다이렉트');
+            window.location.href = '/';
+        }
     }
 });
 

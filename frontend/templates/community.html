@@ -199,12 +199,12 @@
     </div>
     
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="/static/js/navigation.js"></script>
-
     <script> //py에서 받은 키값을 js에서 쓸 수 있게 전역 변수처리
         window.SUPABASE_URL = "{{ supabase_url }}";
         window.SUPABASE_KEY = "{{ supabase_key }}";
     </script>
+    <script src="/static/js/auth.js"></script>
+    <script src="/static/js/navigation.js"></script>
     <script src="/static/js/community.js" type="module"></script> <!--*js 로직 분리-->
 
 </body>
