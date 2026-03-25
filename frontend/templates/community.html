@@ -18,6 +18,27 @@
     <link rel="stylesheet" href="/static/css/community.css">
     <link rel="icon" href="../static/image/favicon.ico" type="image/x-icon">
     
+    <style>
+        /* 모달 닫기 버튼 오른쪽 상단 이동 스타일 */
+        #view-section {
+            position: relative; /* 버튼 절대 위치 기준점 */
+            padding-top: 2rem; /* 버튼 공간 확보 */
+        }
+        .btn-close-top-right {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #64748b;
+            transition: color 0.2s;
+        }
+        .btn-close-top-right:hover {
+            color: #ef4444;
+        }
+    </style>
 </head>
 
 <body class="bg-gray-50">
@@ -134,6 +155,22 @@
                 <div class="btn-group">
                     <button id="btn-to-edit" class="btn btn-primary hidden">수정</button>
                     <button class="btn btn-secondary btn-close-modal">닫기</button>
+                </div>
+
+                <!-- 댓글 영역 -->
+                <div class="comment-section" style="margin-top: 2rem; border-top: 1px solid #e2e8f0; padding-top: 1rem;">
+                    <h4 style="font-size: 1rem; margin-bottom: 1rem;">댓글</h4>
+                    
+                    <!-- 댓글 목록 -->
+                    <div id="comment-list" style="display: flex; flex-direction: column; gap: 1rem; margin-bottom: 1.5rem; max-height: 300px; overflow-y: auto;">
+                        <!-- JS로 댓글 렌더링 -->
+                    </div>
+
+                    <!-- 댓글 작성 폼 -->
+                    <div class="comment-form">
+                        <textarea id="comment_input" rows="2" placeholder="댓글을 남겨보세요..." style="width: 100%; padding: 0.75rem; border: 1px solid #cbd5e1; border-radius: 0.5rem; margin-bottom: 0.5rem;"></textarea>
+                        <button id="btn-save-comment" class="btn btn-primary" style="width: 100%;">댓글 등록</button>
+                    </div>
                 </div>
             </div>
 
