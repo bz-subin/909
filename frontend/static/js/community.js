@@ -88,6 +88,11 @@ URL(publicUrl) + 다른 입력값(input 등) → DB 저장  */
 //             await fetchAllFeeds();
 //         });
 
+// 위에 DOMContentLoaded 살리면 이 부분 지우기
+window.addEventListener('DOMContentLoaded', async () => {
+    await fetchAllFeeds();  
+});
+
 
         //* GET [/get-data]
         // 서버에서 전체 게시글(피드) 싹 다 불러오기
@@ -143,7 +148,7 @@ URL(publicUrl) + 다른 입력값(input 등) → DB 저장  */
             div.innerHTML = `
                 <h3>${feed.title}</h3>
                 <p>${shortContent}</p>
-                ${feed.category_code ? `<span>${feed.category_code}</span>` : ''}  수빈
+                ${feed.category_code ? `<span>${feed.category_code}</span>` : ''}
                 ${imgTag}
                 ${deleteBtn}
                 
@@ -193,7 +198,7 @@ URL(publicUrl) + 다른 입력값(input 등) → DB 저장  */
 
             // const login_user_id = user.id; // auth.js에 있는데 supabase.js의 도움을 받아 UUID 데려옴
             
-            // 임시
+            // 임시(로그인 이으면 삭제 예정)
             const user = { id: "5c3d7540-3dc7-4e3a-a8c9-4dc82d13b2b6" };
             const login_user_id = user.id;
 
@@ -231,6 +236,8 @@ URL(publicUrl) + 다른 입력값(input 등) → DB 저장  */
 
         //* -- [상세보기] 게시글 상세 모달 열기 ---
         function openDetailModal(feed) {
+            console.log("feed.user_id:", feed.user_id);
+            console.log("login_user_id:", login_user_id);
             selected_feed = feed;
             write_div_modal.classList.add('show'); //작성 모달을 감싸는 영역(모달)
             
@@ -247,9 +254,19 @@ URL(publicUrl) + 다른 입력값(input 등) → DB 저장  */
             const imgArea = document.getElementById('view_img_area');
             imgArea.innerHTML = feed.image_url ? `<img src="${feed.image_url}" style="max-width:100%; border-radius:8px;">` : '';
 
+
+
+            ///로그인 시 들어올 login_user_id 부분 테스트용(삭제 예정)
+            window.addEventListener('DOMContentLoaded', async () => {
+                login_user_id = "5c3d7540-3dc7-4e3a-a8c9-4dc82d13b2b6"; // 임시
+                await fetchAllFeeds();
+            });
+
+
             // 작성자 본인 확인 (로그인된 ID와 게시글 작성자 ID 비교) - 수정 버튼
             const btnEdit = document.getElementById('btn-to-edit');
-
+            console.log(feed.user_id)
+            console.log(login_user_id)
             // user_id 비교 (문자열 변환하여 비교)
             if (String(feed.user_id) === String(login_user_id)) {
                 btnEdit.classList.remove('hidden');
