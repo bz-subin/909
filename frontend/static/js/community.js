@@ -68,7 +68,7 @@ URL(publicUrl) + 다른 입력값(input 등) → DB 저장  */
         const feed_div = document.getElementById('feed-div'); //피드 추가할 영역
         const write_div_modal = document.getElementById('write-div-modal'); //
 
-// //?  DOM : html을 읽어서 js가 건들 수 있는 객체로 변한것
+// // //?  DOM : html을 읽어서 js가 건들 수 있는 객체로 변한것
 // // -> 사용 여부 확인 필요
 // //         --- [초기화] DOM 로드 시 로그인 체크 및 데이터 로딩 ---
 //         window.addEventListener('DOMContentLoaded', async () => {
@@ -180,18 +180,23 @@ URL(publicUrl) + 다른 입력값(input 등) → DB 저장  */
             if(!title || !content) return alert("제목과 내용을 입력하세요.");  //제목 또는 내용이 없으면 안내 메시지
 
 
-            const { data: { user }, error } = await supabase.auth.getUser();
-            console.log("user:", data);
-            console.log("error:", error);
+            // const { data: { user }, error } = await supabase.auth.getUser();
+            // console.log("user:", user);
+            // console.log("error:", error);
 
-            // 2. 유저가 없으면(로그인 안 됨) 중단
-            if (error || !user) {
-                alert("로그인이 필요합니다!");
-                return;
-            }
+            // // 2. 유저가 없으면(로그인 안 됨) 중단
+            // if (error || !user) {
+            //     alert("로그인이 필요합니다!");
+            //     return;
+            // }
 
 
-            const login_user_id = user.id; // auth.js에 있는데 supabase.js의 도움을 받아 UUID 데려옴
+            // const login_user_id = user.id; // auth.js에 있는데 supabase.js의 도움을 받아 UUID 데려옴
+            
+            // 임시
+            const user = { id: "5c3d7540-3dc7-4e3a-a8c9-4dc82d13b2b6" };
+            const login_user_id = user.id;
+
 
             try {
                 //* POST [/user_input] 서버로 게시글 입력 받은 데이터 전송 (POST)
