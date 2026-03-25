@@ -183,7 +183,9 @@ async def signup(request: Request):
 async def map_page(request: Request):
     return templates.TemplateResponse("index.html", {
         "request": request,
-        "kakao_key": os.getenv("KAKAO_RESTAPI")  #이 부분 추가 
+        "kakao_key": os.getenv("KAKAO_RESTAPI"),  #이 부분 추가 
+        "supabase_url": os.getenv("SUPABASE_URL"),
+        "supabase_key": os.getenv("SUPABASE_ANON_KEY")
     })
 
 

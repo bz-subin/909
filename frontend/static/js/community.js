@@ -252,7 +252,7 @@ window.addEventListener('DOMContentLoaded', async () => {
             const imgArea = document.getElementById('view_img_area');
             imgArea.innerHTML = feed.image_url ? `<img src="${feed.image_url}" style="max-width:100%; border-radius:8px;">` : '';
 
-
+``
 
             ///로그인 시 들어올 login_user_id 부분 테스트용(삭제 예정)
             window.addEventListener('DOMContentLoaded', async () => {
