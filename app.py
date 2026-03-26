@@ -143,7 +143,6 @@ app.add_middleware(
 
 # 정적 파일 및 템플릿 설정
 app.mount("/static", StaticFiles(directory="frontend/static"), name="static")
-templates = Jinja2Templates(directory="frontend/templates")
 
 
 # ------------------ Pydantic 모델 (입력 데이터 양식) ------------------
