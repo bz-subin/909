@@ -132,7 +132,7 @@ window.loginWithKakao = async function() {
         const { data, error } = await supabaseClient.auth.signInWithOAuth({
             provider: 'kakao',
             options: {
-                redirectTo: 'https://909-production.up.railway.app/' 
+                redirectTo: '909-production.up.railway.app/' 
             }
         });
         if (error) throw error;
