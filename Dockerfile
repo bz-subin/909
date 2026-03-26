@@ -1,5 +1,5 @@
 # 1. 파이썬 환경 빌리기
-FROM python:3.9
+FROM python:3.11-slim
 
 # 2. 가상 컴퓨터 안에 /app 폴더를 만들고 거기로 이동하기 (질문하신 부분!)
 WORKDIR /app
