@@ -382,9 +382,11 @@ URL(publicUrl) + 다른 입력값(input 등) → DB 저장  */
                 // 1. 파일이 변경되었다면: 기존 이미지 삭제 후 새 이미지 업로드
                 if (newFile) {
                     // 기존 이미지가 있다면 삭제 시도 (선택 사항, 에러 무시)
-                    if (selected_feed.image_url) {
+                    if (selected_feed.image_url && selected_feed.image_url.includes('/public/images/')) {
                         try {
-                            const oldPath = selected_feed.image_url.split('/public/images/')[1]; // URL 구조에 따라 파싱 필요
+                            // URL에서 파일명만 추출 (URL 디코딩 포함)
+                            const parts = selected_feed.image_url.split('/public/images/');
+                            const oldPath = parts[parts.length - 1];
                             if(oldPath) {
                                 // URL 디코딩 필요할 수 있음
                                 const decodedPath = decodeURIComponent(oldPath);
@@ -576,7 +578,7 @@ URL(publicUrl) + 다른 입력값(input 등) → DB 저장  */
                     div.className = 'popular-place';
                     div.innerHTML = `
                         <div class="rank">${place.rank}</div>
-                        <div>
+                        <div style="flex: 1;">
                             <h4 style="font-size: 0.875rem;">${place.place_name}</h4>
                             <p style="font-size: 0.75rem; color: var(--text-muted);">좋아요 ${place.like_count}개</p>
                         </div>
