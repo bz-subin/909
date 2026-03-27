@@ -71,7 +71,7 @@ async function loginWithGoogle() {
         const { data, error } = await supabaseClient.auth.signInWithOAuth({
             provider: 'google',
             options: {
-                redirectTo: '/'
+                redirectTo: 'https://eizpocttesnvmvqyiwhv.supabase.co/auth/v1/callback'
             }
         });
         
@@ -132,7 +132,7 @@ window.loginWithKakao = async function() {
         const { data, error } = await supabaseClient.auth.signInWithOAuth({
             provider: 'kakao',
             options: {
-                redirectTo: '/' 
+                redirectTo: 'https://eizpocttesnvmvqyiwhv.supabase.co/auth/v1/callback' 
             }
         });
         if (error) throw error;
