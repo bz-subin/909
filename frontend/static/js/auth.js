@@ -131,9 +131,12 @@ window.loginWithKakao = async function() {
     console.log("🔗 카카오 로그인 버튼 클릭됨!");
     try {
         const { data, error } = await supabaseClient.auth.signInWithOAuth({
-            provider: 'kakao',
+            provider: 'google',
             options: {
-                redirectTo: window.location.origin  // 구글이랑 동일하게
+                redirectTo: window.location.origin,
+                queryParams: {
+                    prompt: 'select_account'
+                }
             }
         });
         if (error) throw error;
