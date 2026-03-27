@@ -132,7 +132,7 @@ window.loginWithKakao = async function() {
         const { data, error } = await supabaseClient.auth.signInWithOAuth({
             provider: 'kakao',
             options: {
-                redirectTo: '/map'
+                redirectTo: window.location.origin  // 구글이랑 동일하게
             }
         });
         if (error) throw error;
