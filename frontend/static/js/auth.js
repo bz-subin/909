@@ -71,7 +71,10 @@ async function loginWithGoogle() {
         const { data, error } = await supabaseClient.auth.signInWithOAuth({
             provider: 'google',
             options: {
-                redirectTo: 'https://eizpocttesnvmvqyiwhv.supabase.co/auth/v1/callback'
+                redirectTo: window.location.origin,
+                queryParams: {
+                    prompt: 'select_account'
+                }
             }
         });
         
@@ -79,8 +82,6 @@ async function loginWithGoogle() {
             console.error('구글 로그인 에러:', error);
             alert('구글 로그인 실패: ' + error.message);
         }
-        
-        // OAuth는 자동으로 리다이렉트되므로 여기서 추가 처리 불필요
         
     } catch (error) {
         console.error('구글 로그인 에러:', error);
