@@ -215,7 +215,7 @@ async def home(request: Request):
 
 # ✅ Supabase Auth: 회원가입 페이지
 @app.get("/signup", response_class=HTMLResponse)
-async def signup(request: Request):
+async def signup_page(request: Request):
     return templates.TemplateResponse(
         "signup.html", 
         {
@@ -627,18 +627,6 @@ async def delete_comment(comment_id: int, user_id: str, db: Session = Depends(ge
     db.delete(comment)
     db.commit()
     return {"result": "success"}
-
-
-# 접속 시 이동
-@app.get("/")
-def move_to_login():
-    # 사용자가 접속하자마자 /login 주소로 강제 이동시킵니다.
-    return RedirectResponse(url="/signup")
-
-@app.get("/signup")
-def login_page():
-    return {"message": "로그인 페이지에 오신 것을 환영합니다!"}
-
 
 
 if __name__ == "__main__":
